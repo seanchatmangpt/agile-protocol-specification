@@ -1,0 +1,13 @@
+[book]
+authors = ["Sean Chatman"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Agile Protocol Specification Guide"
+
+[build]
+build-dir = "book"
+create-missing = true
+
+[output.html]
+default-theme = "dark"
