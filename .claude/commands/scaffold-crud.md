@@ -1,5 +1,5 @@
 ---
-description: Generate CRUD operations for PLAN Pro Stack (Python/Elixir/Nuxt)
+description: Generate CRUD operations for PLAN Pro Stack (Python/Rust/Next.js)
 ---
 
 # CRUD Scaffolding Command
@@ -8,7 +8,7 @@ Generate a complete CRUD implementation for the specified entity using the PLAN 
 
 ## Arguments
 
-- `$ARGUMENTS` - Entity name and optional layer specification (e.g., "User" or "Product:python,nuxt")
+- `$ARGUMENTS` - Entity name and optional layer specification (e.g., "User" or "Product:python,nextjs")
 
 ## Task
 
@@ -32,32 +32,45 @@ Generate:
 3. **Typer CLI Command** (`commands/{entity}.py`)
    - list, get, create, update, delete subcommands
 
-### For Elixir Layer (if specified or all)
+### For Rust Layer (if specified or all)
 
 Generate:
-1. **Ash Resource** (`lib/app/{entity}.ex`)
-   - Attributes with types
-   - CRUD actions
-   - Validations
+1. **Domain Model** (`src/models/{entity}.rs`)
+   - Struct with Serde derive
+   - CreateEntity/UpdateEntity variants
+   - SQLx FromRow implementation
 
-2. **Phoenix Controller** (`lib/app_web/controllers/{entity}_controller.ex`)
-   - index, show, create, update, delete actions
+2. **Axum Handlers** (`src/handlers/{entity}.rs`)
+   - get_all, get_by_id, create, update, delete handlers
+   - Proper error handling with AppError
 
-3. **Ecto Migration** (`priv/repo/migrations/{timestamp}_create_{entity}.exs`)
+3. **SQLx Migration** (`migrations/{timestamp}_create_{entity}.sql`)
+   - CREATE TABLE statement
+   - Indexes for common queries
 
-### For Nuxt Layer (if specified or all)
+4. **Route Registration** (update `src/routes.rs`)
+   - Mount handlers on appropriate paths
+
+### For Next.js Layer (if specified or all)
 
 Generate:
-1. **Pinia Store** (`stores/{entity}.ts`)
+1. **Zustand Store** (`stores/{entity}Store.ts`)
    - State: items, loading, error
    - Actions: getItems, addItem, updateItem, removeItem
 
-2. **Vue Components**
-   - `components/{Entity}List.vue`
-   - `components/{Entity}Form.vue`
-   - `components/{Entity}Detail.vue`
+2. **React Components**
+   - `components/{Entity}List.tsx`
+   - `components/{Entity}Form.tsx`
+   - `components/{Entity}Detail.tsx`
 
-3. **API Composable** (`composables/use{Entity}Api.ts`)
+3. **API Routes** (`app/api/{entity}/route.ts`)
+   - GET, POST handlers
+
+4. **API Route with ID** (`app/api/{entity}/[id]/route.ts`)
+   - GET, PUT, DELETE handlers
+
+5. **Page Component** (`app/{entity}/page.tsx`)
+   - Server component with data fetching
 
 ## Output Format
 

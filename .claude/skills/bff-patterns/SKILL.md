@@ -196,28 +196,39 @@ async def get_dashboard(user_id: str):
     return DashboardResponse(user=user, orders=orders)
 ```
 
-**Elixir/Phoenix:**
-```elixir
-def dashboard(conn, %{"user_id" => user_id}) do
-  tasks = [
-    Task.async(fn -> UserService.get(user_id) end),
-    Task.async(fn -> OrderService.list(user_id) end),
-  ]
-  [user, orders] = Task.await_many(tasks)
-  render(conn, "dashboard.json", user: user, orders: orders)
-end
+**Rust/Axum:**
+```rust
+use axum::{extract::Path, Json};
+use tokio::try_join;
+
+pub async fn dashboard(
+    Path(user_id): Path<String>,
+) -> Result<Json<DashboardResponse>, AppError> {
+    let (user, orders) = try_join!(
+        user_service::get(&user_id),
+        order_service::list(&user_id),
+    )?;
+
+    Ok(Json(DashboardResponse { user, orders }))
+}
 ```
 
-**Nuxt/Nitro:**
+**Next.js API Routes:**
 ```typescript
-export default defineEventHandler(async (event) => {
-  const userId = event.context.params.userId;
+// app/api/dashboard/[userId]/route.ts
+import { NextResponse } from 'next/server';
+
+export async function GET(
+  request: Request,
+  { params }: { params: { userId: string } }
+) {
   const [user, orders] = await Promise.all([
-    $fetch(`/api/users/${userId}`),
-    $fetch(`/api/orders?userId=${userId}`)
+    fetch(`${API_URL}/users/${params.userId}`).then(r => r.json()),
+    fetch(`${API_URL}/orders?userId=${params.userId}`).then(r => r.json())
   ]);
-  return { user, orders };
-});
+
+  return NextResponse.json({ user, orders });
+}
 ```
 
 ## Best Practices
