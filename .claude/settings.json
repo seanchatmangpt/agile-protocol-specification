@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Skill",
+      "Task",
+      "Bash(mdbook *)",
+      "Bash(npm run *)",
+      "Bash(git status)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Edit(specification-guide/**/*.md)",
+      "Edit(*.md)",
+      "Write(specification-guide/**/*.md)",
+      "Write(.claude/**/*)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Read(.env*)",
+      "Edit(.env*)",
+      "Write(.env*)"
+    ]
+  },
+
+  "env": {
+    "PROJECT_NAME": "agile-protocol-specification",
+    "BUILD_DIR": "specification-guide/book",
+    "SRC_DIR": "specification-guide/src"
+  },
+
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '=== APS Session Started ===' && git status --short 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(echo $CLAUDE_FILE_PATHS | head -1); [[ \"$FILE\" == *.md ]] && echo 'Markdown file updated: '$FILE || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git status --short 2>/dev/null && echo '=== Session Complete ===' || true"
+          }
+        ]
+      }
+    ]
+  }
+}
