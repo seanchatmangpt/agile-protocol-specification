@@ -27,6 +27,24 @@ agile-protocol-specification/
 ├── CUSTOM-GPT-CONTEXT.md               # CustomGPT context documentation
 ├── CUSTOMGPT-METAPROMPT-CONTEXT.md     # Meta-prompt creation guidelines
 ├── PLAN PRO CONVO.md                   # Planning documentation
+├── .claude/                            # Claude Code configuration
+│   ├── settings.json                   # Permissions, hooks, environment
+│   ├── commands/                       # Custom slash commands
+│   │   ├── build.md                    # /build - Build mdBook docs
+│   │   ├── serve.md                    # /serve - Local dev server
+│   │   ├── add-chapter.md              # /add-chapter - Add new content
+│   │   ├── validate.md                 # /validate - Check structure
+│   │   └── review-chapter.md           # /review-chapter - Review content
+│   ├── agents/                         # Custom subagents
+│   │   ├── documentation-writer.md     # Specialized doc writer
+│   │   ├── aps-reviewer.md             # AAP-based reviewer
+│   │   └── structure-analyzer.md       # Repository analyzer
+│   ├── skills/                         # Auto-activated capabilities
+│   │   ├── aps-documentation/          # APS doc creation skill
+│   │   └── adversarial-review/         # AAP review skill
+│   └── rules/                          # Path-specific guidelines
+│       ├── markdown-standards.md       # Markdown formatting rules
+│       └── aps-conventions.md          # APS naming conventions
 └── specification-guide/                 # Main mdBook documentation
     ├── book.toml                       # mdBook configuration
     ├── .context.md                     # Repository context metadata
@@ -230,6 +248,48 @@ git add .
 git commit -m "Description of changes"
 git push origin branch-name
 ```
+
+## Claude Code Configuration
+
+This repository includes comprehensive Claude Code configuration in the `.claude/` directory.
+
+### Available Slash Commands
+
+| Command | Description |
+|---------|-------------|
+| `/build` | Build the mdBook documentation |
+| `/serve` | Start local development server |
+| `/add-chapter [section] [name]` | Create a new chapter |
+| `/validate` | Check documentation structure |
+| `/review-chapter [path]` | Review a chapter for APS compliance |
+
+### Custom Agents
+
+| Agent | Purpose |
+|-------|---------|
+| `documentation-writer` | Specialized for creating APS-compliant content |
+| `aps-reviewer` | Implements AAP principles for rigorous review |
+| `structure-analyzer` | Audits repository structure and SUMMARY.md alignment |
+
+### Skills (Auto-Activated)
+
+| Skill | Activates When |
+|-------|----------------|
+| `aps-documentation` | Creating or editing APS documentation |
+| `adversarial-review` | Reviewing documents, PRs, or decisions |
+
+### Rules (Path-Specific)
+
+| Rule | Applies To |
+|------|------------|
+| `markdown-standards` | All `*.md` files |
+| `aps-conventions` | All files in `specification-guide/` |
+
+### Hooks
+
+- **SessionStart**: Displays git status at session start
+- **PostToolUse**: Logs markdown file updates
+- **Stop**: Shows git status at session end
 
 ## Additional Resources
 
