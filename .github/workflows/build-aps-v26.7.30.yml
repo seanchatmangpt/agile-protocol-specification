@@ -1,6 +1,12 @@
 name: Build APS v26.7.30 book and PDF
 
 on:
+  push:
+    branches:
+      - agent/aps-v26.7.30-phd-book
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -21,13 +27,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Materialize the admitted v26.7.30 source tree
         shell: bash
         run: |
           set -euo pipefail
           compgen -G '.aps-bootstrap/aps-v26.7.30.tar.gz.b64.part-*' >/dev/null
-          cat .aps-bootstrap/aps-v26.7.30.tar.gz.b64.part-* | base64 --decode | tar -xzf - -C .
+          cat .aps-bootstrap/aps-v26.7.30.tar.gz.b64.part-* > /tmp/aps-v26.7.30.tar.gz.b64
+          base64 --decode /tmp/aps-v26.7.30.tar.gz.b64 > /tmp/aps-v26.7.30.tar.gz
+          echo '873f0c80a35a43ef6b914a11d92ff8a42d1cff58ef4bf8acb53f1a65ad18963e  /tmp/aps-v26.7.30.tar.gz' | sha256sum -c -
+          tar -xzf /tmp/aps-v26.7.30.tar.gz -C .
           rm -rf .aps-bootstrap
 
       - name: Install Rust
