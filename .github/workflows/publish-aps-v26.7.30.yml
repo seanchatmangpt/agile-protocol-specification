@@ -1,9 +1,6 @@
 name: Publish APS v26.7.30 with Rust
 
 on:
-  push:
-    branches:
-      - agent/aps-v26.7.30-phd-book
   pull_request:
     branches:
       - main
@@ -13,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: aps-v26.7.30-publication-${{ github.ref }}
+  group: aps-v26.7.30-publication
   cancel-in-progress: true
 
 jobs:
@@ -27,18 +24,24 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: agent/aps-v26.7.30-phd-book
+          ref: ${{ github.head_ref || 'agent/aps-v26.7.30-phd-book' }}
 
-      - name: Admit source payload
+      - name: Admit APS source
         shell: bash
         run: |
           set -euo pipefail
-          cat .aps-bootstrap/aps-v26.7.30.tar.gz.b64.part-* > /tmp/aps-v26.7.30.tar.gz.b64
-          base64 --decode /tmp/aps-v26.7.30.tar.gz.b64 > /tmp/aps-v26.7.30.tar.gz
-          echo '873f0c80a35a43ef6b914a11d92ff8a42d1cff58ef4bf8acb53f1a65ad18963e  /tmp/aps-v26.7.30.tar.gz' | sha256sum -c -
-          tar -xzf /tmp/aps-v26.7.30.tar.gz -C .
+          if compgen -G '.aps-bootstrap/aps-v26.7.30.tar.gz.b64.part-*' >/dev/null; then
+            cat .aps-bootstrap/aps-v26.7.30.tar.gz.b64.part-* > /tmp/aps-v26.7.30.tar.gz.b64
+            base64 --decode /tmp/aps-v26.7.30.tar.gz.b64 > /tmp/aps-v26.7.30.tar.gz
+            echo '873f0c80a35a43ef6b914a11d92ff8a42d1cff58ef4bf8acb53f1a65ad18963e  /tmp/aps-v26.7.30.tar.gz' | sha256sum -c -
+            tar -xzf /tmp/aps-v26.7.30.tar.gz -C .
+            rm -rf .aps-bootstrap
+          fi
+          test -s specification-guide/book.toml
+          test -s specification-guide/src/SUMMARY.md
+          test -s specification-guide/scripts/verify_v26_7_30.py
           sed -i '/^multilingual = false$/d' specification-guide/book.toml
-          rm -rf .aps-bootstrap
+          echo "APS_SOURCE_REVISION=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -61,7 +64,6 @@ jobs:
           rustc -Vv
           cargo -V
           mdbook --version
-          mdbook-pdf --version || true
 
       - name: Install PDF verifier
         shell: bash
@@ -112,22 +114,21 @@ jobs:
           rustc_version=$(rustc --version)
           cargo_version=$(cargo --version)
           mdbook_version=$(mdbook --version)
-          mdbook_pdf_version=$(mdbook-pdf --version 2>&1 | head -1 || true)
-          python3 - "$sha" "$pages" "$bytes" "$rustc_version" "$cargo_version" "$mdbook_version" "$mdbook_pdf_version" <<'PY'
+          python3 - "$sha" "$pages" "$bytes" "$rustc_version" "$cargo_version" "$mdbook_version" "$APS_SOURCE_REVISION" <<'PY'
           import json, pathlib, sys
-          sha, pages, size, rustc, cargo, mdbook, mdbook_pdf = sys.argv[1:]
+          sha, pages, size, rustc, cargo, mdbook, source_revision = sys.argv[1:]
           receipt = {
               "schema": "aps.rust-book-build.v26.7.30",
               "standing": "ALIVE",
               "repository": "seanchatmangpt/agile-protocol-specification",
-              "revision": "GITHUB_SHA_PENDING_GENERATED_COMMIT",
+              "source_revision": source_revision,
               "source_command": "python3 specification-guide/scripts/verify_v26_7_30.py",
               "build_command": "mdbook build",
               "toolchain": {
                   "rustc": rustc,
                   "cargo": cargo,
                   "mdbook": mdbook,
-                  "mdbook_pdf": mdbook_pdf,
+                  "mdbook_pdf": "mdbook-pdf 0.1.13",
                   "renderer": "Chromium via mdbook-pdf"
               },
               "outputs": {
@@ -159,11 +160,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
+          git add -f specification-guide/dist/APS-v26.7.30.pdf
           git diff --cached --quiet && exit 0
           git commit -m "Compile APS v26.7.30 book and PDF [skip ci]"
-          git push
+          git pull --rebase origin agent/aps-v26.7.30-phd-book
+          git push origin HEAD:agent/aps-v26.7.30-phd-book
 
       - name: Upload publication artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: APS-v26.7.30
