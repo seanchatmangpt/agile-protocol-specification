@@ -1,0 +1,18 @@
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "message/send",
+  "params": {
+    "agent": "lean-portfolio-management-agent",
+    "skill": "plan-pi",
+    "message": {
+      "role": "user",
+      "parts": [
+        {
+          "kind": "text",
+          "text": "Construct the next bounded enterprise PI plan"
+        }
+      ]
+    }
+  }
+}

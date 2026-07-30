@@ -1,0 +1,46 @@
+{
+  "schema": "aps.safe-scenario.v26.7.30",
+  "name": "global-core-modernization",
+  "seed": 26730,
+  "pi_count": 2,
+  "initial": {
+    "active_features": 448,
+    "blocked_features": 61,
+    "architecture_risk": 7,
+    "compliance_risk": 2,
+    "budget_consumed_pct": 82,
+    "enabler_capacity_pct": 8
+  },
+  "shocks": [
+    {
+      "pi": 1,
+      "iteration": 2,
+      "kind": "regulatory-demand",
+      "magnitude": 3
+    },
+    {
+      "pi": 1,
+      "iteration": 4,
+      "kind": "dependency-wave",
+      "magnitude": 28
+    },
+    {
+      "pi": 2,
+      "iteration": 1,
+      "kind": "market-surge",
+      "magnitude": 42
+    },
+    {
+      "pi": 2,
+      "iteration": 3,
+      "kind": "production-incident",
+      "magnitude": 4
+    },
+    {
+      "pi": 2,
+      "iteration": 4,
+      "kind": "supplier-delay",
+      "magnitude": 16
+    }
+  ]
+}

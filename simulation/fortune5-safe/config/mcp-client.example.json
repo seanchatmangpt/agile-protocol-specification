@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "aps-fortune5-safe": {
+      "command": "cargo",
+      "args": [
+        "run",
+        "--quiet",
+        "--manifest-path",
+        "simulation/fortune5-safe/Cargo.toml",
+        "--",
+        "mcp-stdio",
+        "--config",
+        "simulation/fortune5-safe/config/fortune5-enterprise.json",
+        "--scenario",
+        "simulation/fortune5-safe/config/global-core-modernization.json"
+      ]
+    }
+  }
+}

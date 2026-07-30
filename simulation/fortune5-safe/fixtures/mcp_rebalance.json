@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "safe.capacity.rebalance",
+    "arguments": {
+      "authority": "release-train-engineer",
+      "target": "solution-train-capacity",
+      "delta_pct": 3
+    }
+  }
+}

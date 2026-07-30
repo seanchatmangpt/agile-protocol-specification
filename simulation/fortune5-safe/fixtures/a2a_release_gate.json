@@ -1,0 +1,18 @@
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "method": "message/send",
+  "params": {
+    "agent": "release-governance-agent",
+    "skill": "evaluate-release",
+    "message": {
+      "role": "user",
+      "parts": [
+        {
+          "kind": "text",
+          "text": "Evaluate the exact integrated release candidate"
+        }
+      ]
+    }
+  }
+}

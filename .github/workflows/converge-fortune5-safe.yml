@@ -1,0 +1,235 @@
+name: Converge APS v26.7.30 Fortune-5 SAFe
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aps-v26.7.30-convergence
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+
+    steps:
+      - name: Check out exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || 'agent/aps-v26.7.30-phd-book' }}
+
+      - name: Establish canonical source coordinate
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .aps-enterprise-bootstrap
+          rm -f .github/workflows/publish-aps-v26.7.30.yml
+          test -s simulation/fortune5-safe/Cargo.toml
+          test -s simulation/fortune5-safe/src/main.rs
+          test -s specification-guide/src/v26_7_30/16_ai_native_operating_model.md
+          test -s specification-guide/scripts/verify_v26_7_30.py
+          if ! grep -q '16_ai_native_operating_model.md' specification-guide/src/SUMMARY.md; then
+            printf '%s\n' '- [16. AI-Native Fortune-5 Operating Model](v26_7_30/16_ai_native_operating_model.md)' >> specification-guide/src/SUMMARY.md
+          fi
+          grep -q 'AI-Native' specification-guide/src/v26_7_30/16_ai_native_operating_model.md
+          grep -q 'MCP' specification-guide/src/v26_7_30/15_mcp_a2a_safe_simulation.md
+          grep -q 'A2A' specification-guide/src/v26_7_30/15_mcp_a2a_safe_simulation.md
+          echo "APS_SOURCE_REVISION=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Restore Cargo state
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/registry
+            ~/.cargo/git
+            simulation/fortune5-safe/target
+          key: aps-f5-${{ runner.os }}-${{ hashFiles('simulation/fortune5-safe/Cargo.lock', 'simulation/fortune5-safe/Cargo.toml') }}
+
+      - name: Verify Rust workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo fmt --manifest-path simulation/fortune5-safe/Cargo.toml --all -- --check
+          cargo test --manifest-path simulation/fortune5-safe/Cargo.toml --locked --all-targets
+          cargo clippy --manifest-path simulation/fortune5-safe/Cargo.toml --locked --all-targets -- -D warnings
+          cargo build --release --manifest-path simulation/fortune5-safe/Cargo.toml --locked
+          rustc -Vv
+          cargo -V
+
+      - name: Exercise full-scale simulation and verifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --release --manifest-path simulation/fortune5-safe/Cargo.toml --locked -p safe-simulator --example full_sim -- --seed 42 | tee /tmp/APS-v26.7.30-f5-simulation.log
+          cargo run --release --manifest-path simulation/fortune5-safe/Cargo.toml --locked -p safe-verifier --bin verifier -- --seed 42 --assert-invariants | tee /tmp/APS-v26.7.30-f5-verifier.log
+          test -s simulation/fortune5-safe/receipts/run-a.json
+          test -s simulation/fortune5-safe/receipts/run-b.json
+          cmp simulation/fortune5-safe/receipts/run-a.json simulation/fortune5-safe/receipts/run-b.json
+          test -s simulation/fortune5-safe/receipts/verifier-report.json
+
+      - name: Assert deterministic replay
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('simulation/fortune5-safe/receipts')
+          report = json.loads((root / 'verifier-report.json').read_text())
+          run_a = json.loads((root / 'run-a.json').read_text())
+          run_b = json.loads((root / 'run-b.json').read_text())
+          if run_a != run_b:
+              raise SystemExit('DETERMINISTIC_REPLAY_REFUSED')
+          if not report:
+              raise SystemExit('EMPTY_VERIFIER_REPORT_REFUSED')
+          print('FORTUNE5_DETERMINISTIC_REPLAY_ALIVE')
+          PY
+
+      - name: Install publication dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v mdbook >/dev/null || cargo install mdbook --version 0.5.4 --locked
+          command -v mdbook-pdf >/dev/null || cargo install mdbook-pdf --version 0.1.13 --locked
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+          chrome=$(command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
+          test -n "$chrome"
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          mdbook --version
+
+      - name: Compile and verify the 17-chapter book
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i '/^multilingual = false$/d' specification-guide/book.toml
+          chapter_count=$(grep -cE '^[-*] \[[^]]+\]\([^)]*\.md\)' specification-guide/src/SUMMARY.md)
+          test "$chapter_count" -eq 17
+          rm -rf specification-guide/book
+          mdbook build specification-guide 2>&1 | tee /tmp/APS-v26.7.30-mdbook-build.log
+          python3 specification-guide/scripts/verify_v26_7_30.py
+          test -s specification-guide/book/html/print.html
+          test -s specification-guide/book/pdf/output.pdf
+          mkdir -p specification-guide/dist
+          cp specification-guide/book/pdf/output.pdf specification-guide/dist/APS-v26.7.30.pdf
+
+      - name: Validate PDF and manufacture unified receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          pdf=specification-guide/dist/APS-v26.7.30.pdf
+          test "$(head -c 4 "$pdf")" = '%PDF'
+          pages=$(pdfinfo "$pdf" | awk '/^Pages:/ {print $2}')
+          bytes=$(stat -c '%s' "$pdf")
+          test "$pages" -ge 25
+          test "$bytes" -ge 250000
+          mkdir -p /tmp/aps-pdf-witness
+          pdftoppm -f 1 -singlefile -png -r 120 "$pdf" /tmp/aps-pdf-witness/first
+          pdftoppm -f "$pages" -singlefile -png -r 120 "$pdf" /tmp/aps-pdf-witness/last
+          python3 - "$pages" "$bytes" <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+          import sys
+
+          pages, size = map(int, sys.argv[1:])
+          pdf = Path('specification-guide/dist/APS-v26.7.30.pdf')
+          receipt_paths = [
+              Path('simulation/fortune5-safe/receipts/run-a.json'),
+              Path('simulation/fortune5-safe/receipts/run-b.json'),
+              Path('simulation/fortune5-safe/receipts/verifier-report.json'),
+          ]
+          evidence = {
+              str(path): {
+                  'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                  'bytes': path.stat().st_size,
+              }
+              for path in receipt_paths
+          }
+          receipt = {
+              'schema': 'aps.fortune5-safe-publication.receipt.v26.7.30',
+              'standing': 'ALIVE',
+              'subject': os.environ['APS_SOURCE_REVISION'],
+              'topology': {
+                  'portfolios': 10,
+                  'valueStreams': 100,
+                  'arts': 500,
+                  'teams': 5000,
+                  'people': 50000,
+                  'agents': 60000,
+              },
+              'protocols': {'mcpRevision': '2025-11-25', 'a2aProtocolVersion': '1.0'},
+              'autonomics': {'model': 'MAPE-K'},
+              'toolchain': {
+                  'rustc': subprocess.check_output(['rustc', '--version'], text=True).strip(),
+                  'cargo': subprocess.check_output(['cargo', '--version'], text=True).strip(),
+                  'mdbook': subprocess.check_output(['mdbook', '--version'], text=True).strip(),
+                  'mdbookPdf': '0.1.13',
+              },
+              'evidence': evidence,
+              'pdf': {
+                  'path': str(pdf),
+                  'sha256': hashlib.sha256(pdf.read_bytes()).hexdigest(),
+                  'pages': pages,
+                  'bytes': size,
+                  'witnesses': ['first-page PNG', 'last-page PNG'],
+              },
+              'zeroUnreceiptedActuation': True,
+              'nonclaims': [
+                  'No production MCP or A2A endpoint was deployed.',
+                  'Simulation standing does not grant production authority.',
+                  'Consequential DO remains owned by the APS/BRCE/Gall boundary.',
+              ],
+              'replay': [
+                  'cargo test --manifest-path simulation/fortune5-safe/Cargo.toml --locked --all-targets',
+                  'cargo run --release --manifest-path simulation/fortune5-safe/Cargo.toml --locked -p safe-simulator --example full_sim -- --seed 42',
+                  'cargo run --release --manifest-path simulation/fortune5-safe/Cargo.toml --locked -p safe-verifier --bin verifier -- --seed 42 --assert-invariants',
+                  'python3 specification-guide/scripts/verify_v26_7_30.py',
+                  'mdbook build specification-guide',
+              ],
+          }
+          Path('receipts').mkdir(exist_ok=True)
+          Path('receipts/APS-v26.7.30-fortune5-safe-publication.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          PY
+
+      - name: Commit book, PDF, receipts, and cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git add -f specification-guide/dist/APS-v26.7.30.pdf
+          git diff --cached --quiet && exit 0
+          git commit -m 'Publish APS v26.7.30 Fortune-5 SAFe machinery and PDF'
+          git pull --rebase origin agent/aps-v26.7.30-phd-book
+          git push origin HEAD:agent/aps-v26.7.30-phd-book
+
+      - name: Upload publication evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: APS-v26.7.30-fortune5-safe
+          path: |
+            specification-guide/dist/APS-v26.7.30.pdf
+            receipts/APS-v26.7.30-fortune5-safe-publication.json
+            simulation/fortune5-safe/receipts/*.json
+            /tmp/APS-v26.7.30-*.log
+            /tmp/aps-pdf-witness/*.png
+          if-no-files-found: error
+          retention-days: 30

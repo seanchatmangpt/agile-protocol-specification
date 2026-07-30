@@ -1,0 +1,83 @@
+{
+  "schema": "aps.work-order.v26.7.30",
+  "id": "aps-v26.7.30-complete-book",
+  "release": "v26.7.30",
+  "source": {
+    "repository": "seanchatmangpt/agile-protocol-specification",
+    "base": "7a713c199e23f7b24b4c2d0d80a86996dd106f5c",
+    "admitted_observations": [
+      "book output contains headings but empty bodies",
+      "prior APS 2030 manuscript exists as historical candidate"
+    ]
+  },
+  "target": {
+    "consequence": "Publish a complete normative APS book with formal work-order and receipt semantics",
+    "state": "InReview"
+  },
+  "scope": {
+    "included": [
+      "specification-guide/src/v26_7_30",
+      "specification-guide/schemas",
+      "specification-guide/scripts/verify_v26_7_30.py",
+      "README.md"
+    ],
+    "forbidden": [
+      "hand-edit specification-guide/book",
+      "claim Gall checkpoints executed without receipts"
+    ]
+  },
+  "authority": {
+    "selector": "Sean Chatman",
+    "implementer": "GitHub implementation agent",
+    "verifier": "deterministic APS book verifier",
+    "promoter": "repository owner"
+  },
+  "acceptance": [
+    {
+      "id": "structure",
+      "kind": "integration",
+      "command": "python3 specification-guide/scripts/verify_v26_7_30.py",
+      "expected": "ALIVE"
+    }
+  ],
+  "falsifiers": [
+    {
+      "id": "heading-only-chapter",
+      "same_object": true,
+      "observation": "Any SUMMARY-linked v26.7.30 chapter has fewer than 350 words",
+      "expected_refusal": "CHAPTER_NOT_SUBSTANTIVE"
+    }
+  ],
+  "evidence": {
+    "coordinate_fields": [
+      "source",
+      "revision",
+      "command",
+      "toolchain",
+      "inputDigest",
+      "outputDigest"
+    ],
+    "standing_ceiling": "ALIVE",
+    "receipt_schema": "aps.receipt.v26.7.30"
+  },
+  "gall": {
+    "checkpoints": [
+      {
+        "id": "APS-GALL-001",
+        "claim": "complete book source passes deterministic verifier",
+        "predecessors": []
+      }
+    ]
+  },
+  "rollback": {
+    "on_refusal": "preserve main and repair the candidate branch"
+  },
+  "exclusions": [
+    "mdBook HTML is generated only after source verification",
+    "no claim of regulatory certification"
+  ],
+  "nonclaims": [
+    "book conformance does not prove every downstream implementation",
+    "local verifier does not substitute for external peer review"
+  ]
+}

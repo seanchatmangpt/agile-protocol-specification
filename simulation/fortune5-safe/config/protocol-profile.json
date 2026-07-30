@@ -1,0 +1,50 @@
+{
+  "schema": "aps.mcp-a2a-profile.v26.7.30",
+  "mcp": {
+    "version": "2025-11-25",
+    "binding": "in-process JSON-RPC semantic profile",
+    "methods": [
+      "initialize",
+      "notifications/initialized",
+      "tools/list",
+      "tools/call",
+      "resources/list",
+      "resources/read",
+      "prompts/list",
+      "prompts/get"
+    ],
+    "server_features": ["tools", "resources", "prompts", "logging"],
+    "excluded": [
+      "network transport",
+      "OAuth authorization server",
+      "sampling",
+      "elicitation",
+      "experimental MCP tasks"
+    ],
+    "authority": "MCP exposes capabilities but never grants business authority"
+  },
+  "a2a": {
+    "version": "1.0.0",
+    "binding": "in-process JSON-RPC semantic profile",
+    "methods": [
+      "agent/getCard",
+      "message/send",
+      "tasks/get",
+      "tasks/list",
+      "tasks/cancel"
+    ],
+    "objects": ["AgentCard", "Message", "Task", "Part", "Artifact"],
+    "excluded": [
+      "network transport",
+      "streaming",
+      "push notifications",
+      "signed agent cards",
+      "gRPC and REST bindings"
+    ],
+    "authority": "A2A agents delegate work but must use MCP tools for bounded actuation"
+  },
+  "references": {
+    "mcp": "https://modelcontextprotocol.io/specification/2025-11-25",
+    "a2a": "https://a2a-protocol.org/latest/specification"
+  }
+}
