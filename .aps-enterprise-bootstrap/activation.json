@@ -1,0 +1,11 @@
+{
+  "schema": "aps.enterprise-bootstrap.v26.7.30",
+  "standing": "PARTIAL_ALIVE",
+  "payloadSegments": 12,
+  "payloadSha256": "ae79fc9fc3eb90508bb3c899d19e99116678dcaa86f53e1249df3319f4759cab",
+  "activation": "GitHub Actions must admit, extract, compile, verify, receipt, and remove this bootstrap boundary.",
+  "nonclaims": [
+    "Transport presence is not executable standing.",
+    "No production actuation authority is granted."
+  ]
+}
