@@ -15,3 +15,4 @@
 - [Case Studies and Applied Analysis](v26_7_30/12_case_studies.md)
 - [Templates, Glossary, and Frequently Asked Questions](v26_7_30/13_templates_glossary_faq.md)
 - [Change Log and Standards Map](v26_7_30/14_change_log_references.md)
+- [MCP and A2A Autonomics for a Fortune-5-Scale SAFe Enterprise](v26_7_30/15_mcp_a2a_safe_simulation.md)

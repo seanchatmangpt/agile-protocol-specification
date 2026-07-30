@@ -26,7 +26,7 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.head_ref || 'agent/aps-v26.7.30-phd-book' }}
 
-      - name: Admit APS source
+      - name: Admit APS and simulation source
         shell: bash
         run: |
           set -euo pipefail
@@ -37,9 +37,17 @@ jobs:
             tar -xzf /tmp/aps-v26.7.30.tar.gz -C .
             rm -rf .aps-bootstrap
           fi
+          if compgen -G '.aps-safe-bootstrap/fortune5-safe.tar.gz.b64.part-*' >/dev/null; then
+            cat .aps-safe-bootstrap/fortune5-safe.tar.gz.b64.part-* > /tmp/fortune5-safe.tar.gz.b64
+            base64 --decode /tmp/fortune5-safe.tar.gz.b64 > /tmp/fortune5-safe.tar.gz
+            echo 'a54e95388c0ec80ec1bdbb1341b5aea64b558d6aaff5e84056e6bffbd4ef677e  /tmp/fortune5-safe.tar.gz' | sha256sum -c -
+            tar -xzf /tmp/fortune5-safe.tar.gz -C .
+            rm -rf .aps-safe-bootstrap
+          fi
           test -s specification-guide/book.toml
           test -s specification-guide/src/SUMMARY.md
           test -s specification-guide/scripts/verify_v26_7_30.py
+          test -s simulation/fortune5-safe/src/main.rs
           sed -i '/^multilingual = false$/d' specification-guide/book.toml
           echo "APS_SOURCE_REVISION=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
@@ -153,7 +161,7 @@ jobs:
           pathlib.Path("receipts/APS-v26.7.30-rust-build.json").write_text(json.dumps(receipt, indent=2) + "\n")
           PY
 
-      - name: Commit book, PDF, and receipts
+      - name: Commit book, PDF, simulation source, and receipts
         shell: bash
         run: |
           set -euo pipefail
@@ -162,7 +170,7 @@ jobs:
           git add -A
           git add -f specification-guide/dist/APS-v26.7.30.pdf
           git diff --cached --quiet && exit 0
-          git commit -m "Compile APS v26.7.30 book and PDF [skip ci]"
+          git commit -m "Compile APS v26.7.30 book, PDF, and simulation source [skip ci]"
           git pull --rebase origin agent/aps-v26.7.30-phd-book
           git push origin HEAD:agent/aps-v26.7.30-phd-book
 
