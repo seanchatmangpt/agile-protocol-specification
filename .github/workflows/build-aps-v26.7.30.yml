@@ -73,6 +73,14 @@ jobs:
           test -n "$chrome"
           echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
 
+      - name: Expose mdBook renderer diagnostics
+        working-directory: specification-guide
+        shell: bash
+        run: |
+          set -o pipefail
+          rm -rf book
+          mdbook build 2>&1 | tee /tmp/aps-mdbook-build.log
+
       - name: Verify source candidate
         run: python3 specification-guide/scripts/verify_v26_7_30.py
 
