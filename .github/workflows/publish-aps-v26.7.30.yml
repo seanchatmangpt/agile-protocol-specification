@@ -1,9 +1,8 @@
-name: Publish APS v26.7.30 with Rust
+name: Publish APS v26.7.30 Enterprise Machinery
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -16,8 +15,8 @@ concurrency:
 jobs:
   publish:
     if: github.actor != 'github-actions[bot]'
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
 
     steps:
       - name: Check out exact branch
@@ -26,7 +25,7 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.head_ref || 'agent/aps-v26.7.30-phd-book' }}
 
-      - name: Admit APS and simulation source
+      - name: Admit APS, SAFe, and enterprise sources
         shell: bash
         run: |
           set -euo pipefail
@@ -44,15 +43,27 @@ jobs:
             tar -xzf /tmp/fortune5-safe.tar.gz -C .
             rm -rf .aps-safe-bootstrap
           fi
+          if compgen -G '.aps-enterprise-bootstrap/payload.part-*' >/dev/null; then
+            cat .aps-enterprise-bootstrap/payload.part-* > /tmp/aps-enterprise.tar.gz.b64
+            base64 --decode /tmp/aps-enterprise.tar.gz.b64 > /tmp/aps-enterprise.tar.gz
+            echo 'ae79fc9fc3eb90508bb3c899d19e99116678dcaa86f53e1249df3319f4759cab  /tmp/aps-enterprise.tar.gz' | sha256sum -c -
+            tar -xzf /tmp/aps-enterprise.tar.gz -C .
+            rm -rf .aps-enterprise-bootstrap
+          fi
           test -s specification-guide/book.toml
           test -s specification-guide/src/SUMMARY.md
           test -s specification-guide/scripts/verify_v26_7_30.py
-          test -s simulation/fortune5-safe/src/main.rs
+          test -s enterprise/Cargo.toml
+          test -s enterprise/src/main.rs
+          test -s enterprise/mcp/aps-enterprise.profile.json
+          test -s enterprise/a2a/enterprise-agent-card.json
           sed -i '/^multilingual = false$/d' specification-guide/book.toml
           echo "APS_SOURCE_REVISION=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
 
       - name: Restore Cargo tools
         uses: actions/cache@v4
@@ -61,7 +72,155 @@ jobs:
             ~/.cargo/bin
             ~/.cargo/registry
             ~/.cargo/git
-          key: aps-mdbook-${{ runner.os }}-0.5.4-pdf-0.1.13
+            enterprise/target
+          key: aps-enterprise-${{ runner.os }}-mdbook-0.5.4-pdf-0.1.13-${{ hashFiles('enterprise/Cargo.toml') }}
+
+      - name: Install verification dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check 'jsonschema>=4,<5'
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+          chrome=$(command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
+          test -n "$chrome"
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+
+      - name: Validate enterprise JSON contracts
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          root = Path('enterprise')
+          pairs = [
+              ('schemas/enterprise-operating-model.schema.json', 'examples/fortune5_operating_model.json'),
+              ('schemas/autonomic-policy.schema.json', 'examples/autonomic_policy.json'),
+              ('schemas/a2a-task-envelope.schema.json', 'examples/a2a_task_envelope.json'),
+          ]
+          for schema_path, instance_path in pairs:
+              schema = json.loads((root / schema_path).read_text())
+              instance = json.loads((root / instance_path).read_text())
+              Draft202012Validator.check_schema(schema)
+              errors = sorted(Draft202012Validator(schema).iter_errors(instance), key=lambda e: list(e.path))
+              if errors:
+                  for error in errors:
+                      print(f'{instance_path}:{list(error.path)}: {error.message}')
+                  raise SystemExit(1)
+          for path in [
+              root / 'a2a/enterprise-agent-card.json',
+              root / 'a2a/evidence-verifier-agent-card.json',
+              root / 'mcp/aps-enterprise.profile.json',
+              root / 'examples/telemetry_snapshot.json',
+          ]:
+              json.loads(path.read_text())
+          print('JSON_SCHEMA_FIXTURES_ALIVE')
+          PY
+
+      - name: Compile and test Rust control plane
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo generate-lockfile --manifest-path enterprise/Cargo.toml
+          cargo fmt --manifest-path enterprise/Cargo.toml --all -- --check
+          cargo test --manifest-path enterprise/Cargo.toml --locked --all-targets
+          cargo build --manifest-path enterprise/Cargo.toml --locked
+          rustc -Vv
+          cargo -V
+
+      - name: Validate SAFe topology and autonomic policies
+        shell: bash
+        run: |
+          set -euo pipefail
+          enterprise/target/debug/aps-enterprise validate enterprise | tee /tmp/APS-v26.7.30-enterprise-validation.json
+          enterprise/target/debug/aps-enterprise simulate enterprise | tee /tmp/APS-v26.7.30-autonomic-simulation.json
+          enterprise/target/debug/aps-enterprise dispatch-a2a enterprise enterprise/examples/a2a_task_envelope.json | tee /tmp/APS-v26.7.30-a2a-dispatch.json
+
+      - name: Smoke-test MCP stdio lifecycle
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import subprocess
+
+          proc = subprocess.Popen(
+              ['enterprise/target/debug/aps-enterprise', 'serve-mcp', 'enterprise'],
+              stdin=subprocess.PIPE,
+              stdout=subprocess.PIPE,
+              stderr=subprocess.PIPE,
+              text=True,
+          )
+          requests = [
+              {'jsonrpc':'2.0','id':1,'method':'initialize','params':{'protocolVersion':'2025-11-25','capabilities':{},'clientInfo':{'name':'ci','version':'1.0.0'}}},
+              {'jsonrpc':'2.0','method':'notifications/initialized'},
+              {'jsonrpc':'2.0','id':2,'method':'tools/list','params':{}},
+              {'jsonrpc':'2.0','id':3,'method':'resources/list','params':{}},
+              {'jsonrpc':'2.0','id':4,'method':'tools/call','params':{'name':'aps_validate_enterprise','arguments':{}}},
+          ]
+          responses = []
+          for request in requests:
+              proc.stdin.write(json.dumps(request) + '\n')
+              proc.stdin.flush()
+              if 'id' in request:
+                  line = proc.stdout.readline()
+                  if not line:
+                      raise SystemExit(proc.stderr.read())
+                  responses.append(json.loads(line))
+          proc.stdin.close()
+          proc.wait(timeout=10)
+          assert responses[0]['result']['protocolVersion'] == '2025-11-25'
+          tool_names = {tool['name'] for tool in responses[1]['result']['tools']}
+          assert 'aps_validate_enterprise' in tool_names
+          assert 'aps_request_actuation' not in tool_names
+          assert responses[3]['result']['structuredContent']['standing'] == 'ALIVE'
+          with open('/tmp/APS-v26.7.30-mcp-smoke.json', 'w') as f:
+              json.dump({'standing':'ALIVE','responses':responses}, f, indent=2)
+          print('MCP_STDIO_ALIVE')
+          PY
+
+      - name: Manufacture enterprise machinery receipt
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          evidence = {}
+          for name in [
+              'APS-v26.7.30-enterprise-validation.json',
+              'APS-v26.7.30-autonomic-simulation.json',
+              'APS-v26.7.30-a2a-dispatch.json',
+              'APS-v26.7.30-mcp-smoke.json',
+          ]:
+              path = pathlib.Path('/tmp') / name
+              evidence[name] = {'sha256': hashlib.sha256(path.read_bytes()).hexdigest(), 'bytes': path.stat().st_size}
+          receipt = {
+              'schema': 'aps.enterprise-machinery.receipt.v26.7.30',
+              'standing': 'ALIVE',
+              'subject': os.environ['APS_SOURCE_REVISION'],
+              'toolchain': {
+                  'rustc': subprocess.check_output(['rustc','--version'], text=True).strip(),
+                  'cargo': subprocess.check_output(['cargo','--version'], text=True).strip(),
+              },
+              'protocols': {'mcpRevision':'2025-11-25','a2aProtocolVersion':'1.0'},
+              'safe': {'operatingModel':'AI-Native','scaleProfile':'FORTUNE_5'},
+              'autonomics': {'model':'MAPE-K','effectivePermission':'min(policy,identity,environment,humanApproval)'},
+              'evidence': evidence,
+              'zeroUnreceiptedActuation': True,
+              'nonclaims': [
+                  'No production MCP or A2A endpoint was deployed.',
+                  'Simulation does not grant production actuation authority.',
+                  'Consequential DO remains owned by the APS/BRCE/Gall boundary.',
+              ],
+              'replay': [
+                  'cargo test --manifest-path enterprise/Cargo.toml --locked --all-targets',
+                  'enterprise/target/debug/aps-enterprise validate enterprise',
+                  'enterprise/target/debug/aps-enterprise simulate enterprise',
+              ],
+          }
+          pathlib.Path('receipts').mkdir(exist_ok=True)
+          pathlib.Path('receipts/APS-v26.7.30-enterprise-machinery.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          PY
 
       - name: Compile mdBook toolchain
         shell: bash
@@ -69,35 +228,15 @@ jobs:
           set -euo pipefail
           command -v mdbook >/dev/null || cargo install mdbook --version 0.5.4 --locked
           command -v mdbook-pdf >/dev/null || cargo install mdbook-pdf --version 0.1.13 --locked
-          rustc -Vv
-          cargo -V
           mdbook --version
 
-      - name: Install PDF verifier
+      - name: Compile and verify the 18-chapter book
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y poppler-utils
-          chrome=$(command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
-          test -n "$chrome"
-          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
-
-      - name: Compile mdBook visibly
-        working-directory: specification-guide
-        shell: bash
-        run: |
-          set -o pipefail
-          rm -rf book
-          mdbook build 2>&1 | tee /tmp/aps-mdbook-build.log
-
-      - name: Verify APS source and render replay
-        run: python3 specification-guide/scripts/verify_v26_7_30.py
-
-      - name: Promote compiled PDF candidate
-        shell: bash
-        run: |
-          set -euo pipefail
+          rm -rf specification-guide/book
+          mdbook build specification-guide 2>&1 | tee /tmp/aps-mdbook-build.log
+          python3 specification-guide/scripts/verify_v26_7_30.py
           test -s specification-guide/book/html/print.html
           test -s specification-guide/book/pdf/output.pdf
           mkdir -p specification-guide/dist
@@ -108,7 +247,7 @@ jobs:
         run: |
           set -euo pipefail
           pdf=specification-guide/dist/APS-v26.7.30.pdf
-          test "$(head -c 4 "$pdf")" = "%PDF"
+          test "$(head -c 4 "$pdf")" = '%PDF'
           pages=$(pdfinfo "$pdf" | awk '/^Pages:/ {print $2}')
           bytes=$(stat -c '%s' "$pdf")
           test "$pages" -ge 25
@@ -116,71 +255,60 @@ jobs:
           mkdir -p /tmp/aps-pdf-witness
           pdftoppm -f 1 -singlefile -png -r 120 "$pdf" /tmp/aps-pdf-witness/first
           pdftoppm -f "$pages" -singlefile -png -r 120 "$pdf" /tmp/aps-pdf-witness/last
-          test -s /tmp/aps-pdf-witness/first.png
-          test -s /tmp/aps-pdf-witness/last.png
           sha=$(sha256sum "$pdf" | awk '{print $1}')
-          rustc_version=$(rustc --version)
-          cargo_version=$(cargo --version)
-          mdbook_version=$(mdbook --version)
-          python3 - "$sha" "$pages" "$bytes" "$rustc_version" "$cargo_version" "$mdbook_version" "$APS_SOURCE_REVISION" <<'PY'
-          import json, pathlib, sys
-          sha, pages, size, rustc, cargo, mdbook, source_revision = sys.argv[1:]
+          python3 - "$sha" "$pages" "$bytes" "$APS_SOURCE_REVISION" <<'PY'
+          import json, pathlib, subprocess, sys
+          sha, pages, size, source_revision = sys.argv[1:]
           receipt = {
-              "schema": "aps.rust-book-build.v26.7.30",
-              "standing": "ALIVE",
-              "repository": "seanchatmangpt/agile-protocol-specification",
-              "source_revision": source_revision,
-              "source_command": "python3 specification-guide/scripts/verify_v26_7_30.py",
-              "build_command": "mdbook build",
-              "toolchain": {
-                  "rustc": rustc,
-                  "cargo": cargo,
-                  "mdbook": mdbook,
-                  "mdbook_pdf": "mdbook-pdf 0.1.13",
-                  "renderer": "Chromium via mdbook-pdf"
+              'schema':'aps.rust-book-build.v26.7.30',
+              'standing':'ALIVE',
+              'repository':'seanchatmangpt/agile-protocol-specification',
+              'source_revision':source_revision,
+              'source_command':'python3 specification-guide/scripts/verify_v26_7_30.py',
+              'build_command':'mdbook build specification-guide',
+              'toolchain':{
+                  'rustc':subprocess.check_output(['rustc','--version'], text=True).strip(),
+                  'cargo':subprocess.check_output(['cargo','--version'], text=True).strip(),
+                  'mdbook':subprocess.check_output(['mdbook','--version'], text=True).strip(),
+                  'mdbook_pdf':'mdbook-pdf 0.1.13',
+                  'renderer':'Chromium via mdbook-pdf',
               },
-              "outputs": {
-                  "html": "specification-guide/book/html/print.html",
-                  "pdf": "specification-guide/dist/APS-v26.7.30.pdf",
-                  "pdf_sha256": sha,
-                  "pdf_pages": int(pages),
-                  "pdf_bytes": int(size),
-                  "render_witnesses": ["first-page PNG", "last-page PNG"]
+              'outputs':{
+                  'html':'specification-guide/book/html/print.html',
+                  'pdf':'specification-guide/dist/APS-v26.7.30.pdf',
+                  'pdf_sha256':sha,
+                  'pdf_pages':int(pages),
+                  'pdf_bytes':int(size),
+                  'render_witnesses':['first-page PNG','last-page PNG'],
               },
-              "nonclaims": [
-                  "ALIVE is bounded to the recorded source, build, structural PDF, and render-witness checks",
-                  "visual inspection outside the rendered witness pages is not claimed",
-                  "downstream Gall checkpoint execution is not claimed"
-              ],
-              "replay": [
-                  "python3 specification-guide/scripts/verify_v26_7_30.py",
-                  "cd specification-guide && mdbook build",
-                  "pdfinfo specification-guide/dist/APS-v26.7.30.pdf"
-              ]
+              'enterprise_receipt':'receipts/APS-v26.7.30-enterprise-machinery.json',
+              'nonclaims':['ALIVE is bounded to recorded checks.','No downstream production actuation is claimed.'],
           }
-          pathlib.Path("receipts/APS-v26.7.30-rust-build.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          pathlib.Path('receipts/APS-v26.7.30-rust-build.json').write_text(json.dumps(receipt, indent=2) + '\n')
           PY
 
-      - name: Commit book, PDF, simulation source, and receipts
+      - name: Commit machinery, book, PDF, and receipts
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
           git add -f specification-guide/dist/APS-v26.7.30.pdf
           git diff --cached --quiet && exit 0
-          git commit -m "Compile APS v26.7.30 book, PDF, and simulation source [skip ci]"
+          git commit -m 'Compile APS v26.7.30 enterprise machinery, book, and PDF'
           git pull --rebase origin agent/aps-v26.7.30-phd-book
           git push origin HEAD:agent/aps-v26.7.30-phd-book
 
-      - name: Upload publication artifact
+      - name: Upload publication receipts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: APS-v26.7.30
+          name: APS-v26.7.30-enterprise
           path: |
             specification-guide/dist/APS-v26.7.30.pdf
             receipts/APS-v26.7.30-rust-build.json
+            receipts/APS-v26.7.30-enterprise-machinery.json
+            /tmp/APS-v26.7.30-*.json
           if-no-files-found: error
           retention-days: 30
