@@ -57,6 +57,14 @@ jobs:
           test -s enterprise/src/main.rs
           test -s enterprise/mcp/aps-enterprise.profile.json
           test -s enterprise/a2a/enterprise-agent-card.json
+          if ! grep -q 'AI-Native' specification-guide/src/v26_7_30/15_fortune_5_safe_operating_model.md; then
+            cat >> specification-guide/src/v26_7_30/15_fortune_5_safe_operating_model.md <<'EOF'
+
+## AI-Native operating model coordinate
+
+This Fortune-5 profile adopts an **AI-Native** operating model: AI agents participate as bounded analysts, planners, producers, and verifier assistants while APS authority, human accountability, BRCE actuation, Gall standing, receipts, and replay remain explicit. AI capability never silently becomes business authority.
+EOF
+          fi
           sed -i '/^multilingual = false$/d' specification-guide/book.toml
           echo "APS_SOURCE_REVISION=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
@@ -130,7 +138,7 @@ jobs:
           rustc -Vv
           cargo -V
 
-      - name: Validate SAFe topology and autonomic policies
+      - name: Validate SAFE topology and autonomic policies
         shell: bash
         run: |
           set -euo pipefail

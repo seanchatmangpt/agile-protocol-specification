@@ -3,16 +3,21 @@
   "standing": "PARTIAL_ALIVE",
   "payloadSegments": 12,
   "payloadSha256": "ae79fc9fc3eb90508bb3c899d19e99116678dcaa86f53e1249df3319f4759cab",
-  "repair": "Run cargo fmt before test and build; commit the formatted Rust source with the verified publication.",
   "observed": {
     "archiveAdmission": "ALIVE",
     "jsonSchemaFixtures": "ALIVE",
-    "rustCompilation": "BUILD_BROKEN",
-    "failure": "rustfmt formatting drift"
+    "rustTestsAndBuild": "ALIVE",
+    "safeTopology": "ALIVE",
+    "autonomicSimulation": "ALIVE",
+    "a2aDispatch": "ALIVE",
+    "mcpStdioLifecycle": "ALIVE",
+    "enterpriseReceipt": "ALIVE",
+    "bookVerification": "BLOCKED"
   },
-  "activation": "GitHub Actions must re-admit, format, compile, test, verify, receipt, and remove this bootstrap boundary.",
+  "repair": "Persist the exact AI-Native operating-model coordinate in chapter 15 before the 18-chapter verifier runs.",
+  "activation": "GitHub Actions must re-admit, compile, verify the manuscript invariant, rebuild PDF, receipt, and remove this bootstrap boundary.",
   "nonclaims": [
-    "Transport presence is not executable standing.",
+    "No production MCP or A2A endpoint is deployed.",
     "No production actuation authority is granted."
   ]
 }
