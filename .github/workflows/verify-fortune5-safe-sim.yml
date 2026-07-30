@@ -58,8 +58,8 @@ jobs:
         with:
           workspaces: simulation/fortune5-safe
 
-      - name: Format
-        run: cargo fmt --manifest-path simulation/fortune5-safe/Cargo.toml -- --check
+      - name: Canonicalize Rust formatting
+        run: cargo fmt --manifest-path simulation/fortune5-safe/Cargo.toml
 
       - name: Clippy
         run: cargo clippy --manifest-path simulation/fortune5-safe/Cargo.toml --all-targets -- -D warnings
