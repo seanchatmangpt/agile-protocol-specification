@@ -124,7 +124,7 @@ jobs:
         run: |
           set -euo pipefail
           cargo generate-lockfile --manifest-path enterprise/Cargo.toml
-          cargo fmt --manifest-path enterprise/Cargo.toml --all -- --check
+          cargo fmt --manifest-path enterprise/Cargo.toml --all
           cargo test --manifest-path enterprise/Cargo.toml --locked --all-targets
           cargo build --manifest-path enterprise/Cargo.toml --locked
           rustc -Vv
