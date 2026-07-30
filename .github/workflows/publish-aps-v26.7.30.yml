@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - agent/aps-v26.7.30-phd-book
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
