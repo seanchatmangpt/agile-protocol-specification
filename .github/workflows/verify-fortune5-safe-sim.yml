@@ -48,7 +48,7 @@ jobs:
           test -s simulation/fortune5-safe/src/main.rs
           test -s simulation/fortune5-safe/scripts/verify.py
 
-      - name: Repair checked division law
+      - name: Repair admitted source laws
         shell: bash
         run: |
           python3 - <<'PY'
@@ -81,6 +81,19 @@ jobs:
           if count != 1:
               raise SystemExit(f'ENGINE_CHECKED_DIVISION_PATCH_REFUSED:{count}')
           engine.write_text(source)
+
+          verifier = Path('simulation/fortune5-safe/scripts/verify.py')
+          source = verifier.read_text()
+          old = '        "stdout": process.stdout[-4000:],'
+          new = '        "stdout": process.stdout if "self-test" in command else process.stdout[-4000:],'
+          if source.count(old) != 1:
+              raise SystemExit('SELF_TEST_STDOUT_CAPTURE_PATCH_REFUSED')
+          source = source.replace(old, new)
+          old = '        commands.append(self_test_run)'
+          new = '        commands.append({**self_test_run, "stdout": self_test_run["stdout"][-4000:]})'
+          if source.count(old) != 1:
+              raise SystemExit('SELF_TEST_RECEIPT_BOUND_PATCH_REFUSED')
+          verifier.write_text(source.replace(old, new))
           PY
 
       - name: Install Rust verifier toolchain
