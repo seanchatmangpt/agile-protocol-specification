@@ -7,6 +7,7 @@ on:
     paths:
       - "simulation/fortune5-safe/**"
       - "specification-guide/src/v26_7_30/15_mcp_a2a_safe_simulation.md"
+      - "specification-guide/src/v26_7_30/16_ai_native_operating_model.md"
       - "specification-guide/src/v26_7_30/10_tools_automation.md"
       - "specification-guide/src/SUMMARY.md"
       - "specification-guide/examples/aps_v26_7_30_mcp_a2a_safe_work_order.json"
