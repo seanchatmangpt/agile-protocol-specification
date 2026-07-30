@@ -53,40 +53,34 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           autonomics = Path('simulation/fortune5-safe/src/autonomics.rs')
           source = autonomics.read_text()
-          old = '''    let blocked_ratio_basis_points = if metrics.active_features == 0 {
-              0
-          } else {
-              metrics.blocked_features.saturating_mul(10_000) / metrics.active_features
-          };'''
-          new = '''    let blocked_ratio_basis_points = metrics
+          pattern = r"    let blocked_ratio_basis_points = if metrics\.active_features == 0 \{\n\s*0\n\s*\} else \{\n\s*metrics\.blocked_features\.saturating_mul\(10_000\) / metrics\.active_features\n\s*\};"
+          replacement = """    let blocked_ratio_basis_points = metrics
               .blocked_features
               .saturating_mul(10_000)
               .checked_div(metrics.active_features)
-              .unwrap_or(0);'''
-          if old not in source:
-              raise SystemExit('AUTONOMICS_CHECKED_DIVISION_PATCH_REFUSED')
-          autonomics.write_text(source.replace(old, new))
+              .unwrap_or(0);"""
+          source, count = re.subn(pattern, replacement, source)
+          if count != 1:
+              raise SystemExit(f'AUTONOMICS_CHECKED_DIVISION_PATCH_REFUSED:{count}')
+          autonomics.write_text(source)
 
           engine = Path('simulation/fortune5-safe/src/engine.rs')
           source = engine.read_text()
-          old = '''                let blocked_ratio = if self.metrics.active_features == 0 {
-                      0
-                  } else {
-                      self.metrics.blocked_features.saturating_mul(100)
-                          / self.metrics.active_features
-                  };'''
-          new = '''                let blocked_ratio = self
+          pattern = r"                let blocked_ratio = if self\.metrics\.active_features == 0 \{\n\s*0\n\s*\} else \{\n\s*self\.metrics\.blocked_features\.saturating_mul\(100\)\n\s*/ self\.metrics\.active_features\n\s*\};"
+          replacement = """                let blocked_ratio = self
                       .metrics
                       .blocked_features
                       .saturating_mul(100)
                       .checked_div(self.metrics.active_features)
-                      .unwrap_or(0);'''
-          if old not in source:
-              raise SystemExit('ENGINE_CHECKED_DIVISION_PATCH_REFUSED')
-          engine.write_text(source.replace(old, new))
+                      .unwrap_or(0);"""
+          source, count = re.subn(pattern, replacement, source)
+          if count != 1:
+              raise SystemExit(f'ENGINE_CHECKED_DIVISION_PATCH_REFUSED:{count}')
+          engine.write_text(source)
           PY
 
       - name: Install Rust verifier toolchain
