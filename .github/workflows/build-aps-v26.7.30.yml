@@ -38,6 +38,7 @@ jobs:
           base64 --decode /tmp/aps-v26.7.30.tar.gz.b64 > /tmp/aps-v26.7.30.tar.gz
           echo '873f0c80a35a43ef6b914a11d92ff8a42d1cff58ef4bf8acb53f1a65ad18963e  /tmp/aps-v26.7.30.tar.gz' | sha256sum -c -
           tar -xzf /tmp/aps-v26.7.30.tar.gz -C .
+          sed -i '/^multilingual = false$/d' specification-guide/book.toml
           rm -rf .aps-bootstrap
 
       - name: Install Rust
