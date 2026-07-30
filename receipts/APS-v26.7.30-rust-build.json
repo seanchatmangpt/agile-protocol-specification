@@ -1,0 +1,36 @@
+{
+  "schema": "aps.rust-book-build.v26.7.30",
+  "standing": "ALIVE",
+  "repository": "seanchatmangpt/agile-protocol-specification",
+  "revision": "GITHUB_SHA_PENDING_GENERATED_COMMIT",
+  "source_command": "python3 specification-guide/scripts/verify_v26_7_30.py",
+  "build_command": "mdbook build",
+  "toolchain": {
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "cargo": "cargo 1.97.1 (c980f4866 2026-06-30)",
+    "mdbook": "mdbook v0.5.4",
+    "mdbook_pdf": "",
+    "renderer": "Chromium via mdbook-pdf"
+  },
+  "outputs": {
+    "html": "specification-guide/book/html/print.html",
+    "pdf": "specification-guide/dist/APS-v26.7.30.pdf",
+    "pdf_sha256": "97113a767934ac0d1536ff61596dbc5b83b935fabb94f9a18e7361e1e58a889b",
+    "pdf_pages": 128,
+    "pdf_bytes": 1516821,
+    "render_witnesses": [
+      "first-page PNG",
+      "last-page PNG"
+    ]
+  },
+  "nonclaims": [
+    "ALIVE is bounded to the recorded source, build, structural PDF, and render-witness checks",
+    "visual inspection outside the rendered witness pages is not claimed",
+    "downstream Gall checkpoint execution is not claimed"
+  ],
+  "replay": [
+    "python3 specification-guide/scripts/verify_v26_7_30.py",
+    "cd specification-guide && mdbook build",
+    "pdfinfo specification-guide/dist/APS-v26.7.30.pdf"
+  ]
+}
