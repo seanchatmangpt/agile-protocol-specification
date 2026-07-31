@@ -1,7 +1,7 @@
 {
   "schema": "aps.receipt.v26.7.31",
   "operation_id": "aps-v26.7.31-ggen-enterprise-architecture",
-  "subject": "sha256:7b7d524da6246db816ba65fd4c06afa46bc8bd3857483530f8f00c6b1aea4597",
+  "subject": "sha256:db964190c80dc726a8ddd7fb479233ce028b04593687a9b97a6c56e0f40fe7ec",
   "coordinate": {
     "source": "seanchatmangpt/agile-protocol-specification",
     "revision": "WORKTREE",
@@ -31,17 +31,17 @@
     {
       "kind": "chapter_part",
       "path": "specification-guide/src/v26_7_30/ea_strategy/01_rwr_execution_foundation.md",
-      "sha256": "68f47eb0ce239050a92bea7ed6dc59becf01ecd4467ec7b41dbeac59df0cc7b2"
+      "sha256": "cfd08846f85e592483e594b9361f88257c88204b3b92ab2e17d611526be69a8a"
     },
     {
       "kind": "chapter_part",
       "path": "specification-guide/src/v26_7_30/ea_strategy/02_graph_building_blocks_transition.md",
-      "sha256": "78647edad675672cbac8bbbe15f0b744d0ea6830fe3fdf3d3d6ab68090bd7b0e"
+      "sha256": "fce4822e98ec439fdce2f88d65e0972c88dff25433ea90eeed8bedf4028477ea"
     },
     {
       "kind": "chapter_part",
       "path": "specification-guide/src/v26_7_30/ea_strategy/03_portfolio_governance_evidence.md",
-      "sha256": "ad01b9ec9e80a5ecf71796e23f7fd9db40a818bd4c9cb8307be34a01231fcc7d"
+      "sha256": "4cf421952d21cd85c786b00ca83af8f07c9e70c5bb2e3e000cd3f64f8928ab7f"
     },
     {
       "kind": "chapter_part",
