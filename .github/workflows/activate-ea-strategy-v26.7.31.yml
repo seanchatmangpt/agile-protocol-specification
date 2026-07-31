@@ -1,0 +1,102 @@
+name: Activate APS Enterprise Architecture as Strategy v26.7.31
+
+on:
+  push:
+    branches:
+      - agent/aps-last-7d-ggen-standards
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aps-ea-strategy-activation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  activate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out exact activation head
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+
+      - name: Admit and extract bounded payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .aps-ea-strategy/payload.b64.part-* > /tmp/aps-ea-strategy-payload.b64
+          base64 --decode /tmp/aps-ea-strategy-payload.b64 > /tmp/aps-ea-strategy-payload.tar.gz
+          echo '76e8d8d07d8ebd3b1e58342e184018dd7f752034f641ca3e6cf9e8e16daeb470  /tmp/aps-ea-strategy-payload.tar.gz' | sha256sum --check --strict
+          tar -tzf /tmp/aps-ea-strategy-payload.tar.gz | sort > /tmp/aps-ea-strategy-files.txt
+          cat > /tmp/aps-ea-strategy-expected.txt <<'FILES'
+          .github/workflows/verify-ea-strategy-v26.7.31.yml
+          README.md
+          receipts/APS-v26.7.31-ggen-enterprise-architecture.json
+          specification-guide/scripts/verify_ea_strategy_v26_7_31.py
+          specification-guide/src/SUMMARY.md
+          specification-guide/src/v26_7_30/17_enterprise_architecture_as_strategy.md
+          specification-guide/standards/ggen-enterprise-architecture-v26.7.31.json
+          FILES
+          sort -o /tmp/aps-ea-strategy-expected.txt /tmp/aps-ea-strategy-expected.txt
+          diff -u /tmp/aps-ea-strategy-expected.txt /tmp/aps-ea-strategy-files.txt
+          tar --extract --gzip --file /tmp/aps-ea-strategy-payload.tar.gz --directory . --no-same-owner
+
+      - name: Replay focused Enterprise Architecture verifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile specification-guide/scripts/verify_ea_strategy_v26_7_31.py
+          python3 specification-guide/scripts/verify_ea_strategy_v26_7_31.py
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          profile = json.loads(Path('specification-guide/standards/ggen-enterprise-architecture-v26.7.31.json').read_text())
+          assert len(profile['dimensions']) == 21
+          assert sum(len(item['proof_obligations']) for item in profile['dimensions']) == 63
+          assert profile['rwr_fence']['original_maturity_stages'] == [
+              'Business Silos',
+              'Standardized Technology',
+              'Optimized Core',
+              'Business Modularity',
+          ]
+          assert profile['rwr_fence']['ggen_extension_stage'] == 'Evidence-Bearing Self-Governance'
+          assert profile['actuation']['exclusive_path'] == 'BRCE'
+          assert profile['cloud_profiles']['gpc_alias_for'] == 'GCP'
+
+          summary = Path('specification-guide/src/SUMMARY.md').read_text().splitlines()
+          links = [line for line in summary if '](' in line and line.rstrip().endswith('.md)')]
+          top = [line for line in links if line.startswith('- [')]
+          assert len(top) == 18, len(top)
+          assert len(links) == 19, len(links)
+          PY
+
+      - name: Publish exact bounded tree and remove carrier
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          rm -rf .aps-ea-strategy
+          rm -f .github/workflows/activate-ea-strategy-v26.7.31.yml
+          git add \
+            README.md \
+            specification-guide/src/SUMMARY.md \
+            specification-guide/src/v26_7_30/17_enterprise_architecture_as_strategy.md \
+            specification-guide/standards/ggen-enterprise-architecture-v26.7.31.json \
+            specification-guide/scripts/verify_ea_strategy_v26_7_31.py \
+            .github/workflows/verify-ea-strategy-v26.7.31.yml \
+            receipts/APS-v26.7.31-ggen-enterprise-architecture.json \
+            .aps-ea-strategy \
+            .github/workflows/activate-ea-strategy-v26.7.31.yml
+          git diff --cached --check
+          git commit -m 'feat(aps): apply Enterprise Architecture as Strategy for ggen'
+          git push origin "HEAD:${TARGET_BRANCH}"
