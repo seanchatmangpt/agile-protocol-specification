@@ -18,3 +18,4 @@
 - [MCP and A2A Autonomics for a Fortune-5-Scale SAFe Enterprise](v26_7_30/15_mcp_a2a_safe_simulation.md)
 - [AI-Native Fortune-5 Operating Model](v26_7_30/16_ai_native_operating_model.md)
 - [ggen Manufacturing, Building Blocks, and Release Law](v26_7_30/16_ggen_manufacturing_standard.md)
+  - [Enterprise Architecture as Strategy with ggen](v26_7_30/17_enterprise_architecture_as_strategy.md)
