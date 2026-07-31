@@ -1,12 +1,13 @@
 {
   "schema": "aps.receipt.v26.7.31",
   "operation_id": "aps-v26.7.31-ggen-standard",
-  "subject": "sha256:64f89f6b3b411043f4ce9bd4b94a00a198e101fb41e0f55681c54c1e0e42abb8",
+  "subject": "sha256:38b8ee70edc1856f91ce4667fc43fc6f99c7033b4d32e2c599fca8f2574879df",
   "coordinate": {
     "source": "seanchatmangpt/agile-protocol-specification",
-    "revision": "WORKTREE",
+    "revision_kind": "SOURCE_SET",
+    "revision": "sha256:38b8ee70edc1856f91ce4667fc43fc6f99c7033b4d32e2c599fca8f2574879df",
     "command": "python3 specification-guide/scripts/verify_ggen_v26_7_31.py",
-    "toolchain": "3.13.5",
+    "toolchain_contract": "python>=3.11",
     "ggen_source_revision": "68952593c40214ac1a681073d65f3902a9cdfce4"
   },
   "standing": "ALIVE",
@@ -30,7 +31,7 @@
     {
       "kind": "summary",
       "path": "specification-guide/src/SUMMARY.md",
-      "sha256": "58e5019c5a55b170eb325c579e186e7a8586ddfed8b9bf1f3151a284f3b407bf"
+      "sha256": "5c195666dcad1aa7b7489cef49c7eca1bb9ce4dc27a4ddd724b35059374ef2c3"
     }
   ],
   "replay": {
