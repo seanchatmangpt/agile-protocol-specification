@@ -1,12 +1,13 @@
 {
   "schema": "aps.receipt.v26.7.31",
   "operation_id": "aps-v26.7.31-ggen-enterprise-architecture",
-  "subject": "sha256:db964190c80dc726a8ddd7fb479233ce028b04593687a9b97a6c56e0f40fe7ec",
+  "subject": "sha256:0292fc951cd1d75de93d7256a21d9cb7720c03f35dd7e376cea6f00997b339f6",
   "coordinate": {
     "source": "seanchatmangpt/agile-protocol-specification",
-    "revision": "WORKTREE",
+    "revision_kind": "SOURCE_SET",
+    "revision": "sha256:0292fc951cd1d75de93d7256a21d9cb7720c03f35dd7e376cea6f00997b339f6",
     "command": "python3 specification-guide/scripts/verify_ea_strategy_v26_7_31.py",
-    "toolchain": "3.13.5",
+    "toolchain_contract": "python>=3.11",
     "ggen_source_revision": "68952593c40214ac1a681073d65f3902a9cdfce4"
   },
   "standing": "ALIVE",
@@ -21,7 +22,7 @@
     {
       "kind": "profile",
       "path": "specification-guide/standards/ggen-enterprise-architecture-v26.7.31.json",
-      "sha256": "d3b3d87b8b88b649288cb3d3096f6a892484665736d904860f1a6357ff23f557"
+      "sha256": "d2fb0691db695abec202e714a5b994d29eb17e64d14023c46268bbdca9ab4e24"
     },
     {
       "kind": "chapter_stub",
@@ -31,17 +32,17 @@
     {
       "kind": "chapter_part",
       "path": "specification-guide/src/v26_7_30/ea_strategy/01_rwr_execution_foundation.md",
-      "sha256": "cfd08846f85e592483e594b9361f88257c88204b3b92ab2e17d611526be69a8a"
+      "sha256": "68f47eb0ce239050a92bea7ed6dc59becf01ecd4467ec7b41dbeac59df0cc7b2"
     },
     {
       "kind": "chapter_part",
       "path": "specification-guide/src/v26_7_30/ea_strategy/02_graph_building_blocks_transition.md",
-      "sha256": "fce4822e98ec439fdce2f88d65e0972c88dff25433ea90eeed8bedf4028477ea"
+      "sha256": "78647edad675672cbac8bbbe15f0b744d0ea6830fe3fdf3d3d6ab68090bd7b0e"
     },
     {
       "kind": "chapter_part",
       "path": "specification-guide/src/v26_7_30/ea_strategy/03_portfolio_governance_evidence.md",
-      "sha256": "4cf421952d21cd85c786b00ca83af8f07c9e70c5bb2e3e000cd3f64f8928ab7f"
+      "sha256": "ad01b9ec9e80a5ecf71796e23f7fd9db40a818bd4c9cb8307be34a01231fcc7d"
     },
     {
       "kind": "chapter_part",
