@@ -12,6 +12,12 @@ PROFILE = ROOT / "specification-guide" / "standards" / "ggen-enterprise-architec
 CHAPTER = ROOT / "specification-guide" / "src" / "v26_7_30" / "17_enterprise_architecture_as_strategy.md"
 SUMMARY = ROOT / "specification-guide" / "src" / "SUMMARY.md"
 RECEIPT = ROOT / "receipts" / "APS-v26.7.31-ggen-enterprise-architecture.json"
+CHAPTER_PARTS = [
+    CHAPTER.parent / "ea_strategy" / "01_rwr_execution_foundation.md",
+    CHAPTER.parent / "ea_strategy" / "02_graph_building_blocks_transition.md",
+    CHAPTER.parent / "ea_strategy" / "03_portfolio_governance_evidence.md",
+    CHAPTER.parent / "ea_strategy" / "04_maturity_gall_operationalization.md",
+]
 
 EXPECTED_MODELS = {
     ("Diversification", "LOW", "LOW"),
@@ -83,7 +89,7 @@ def digest(path: Path) -> str:
 
 def main() -> int:
     failures: list[dict] = []
-    for path in [PROFILE, CHAPTER, SUMMARY]:
+    for path in [PROFILE, CHAPTER, SUMMARY, *CHAPTER_PARTS]:
         if not path.exists():
             failures.append({"code": "REQUIRED_FILE_MISSING", "path": str(path.relative_to(ROOT))})
 
@@ -95,7 +101,8 @@ def main() -> int:
             data = json.loads(PROFILE.read_text())
         except Exception as exc:
             failures.append({"code": "PROFILE_JSON_INVALID", "error": str(exc)})
-        chapter = CHAPTER.read_text()
+        chapter_stub = CHAPTER.read_text()
+        chapter = chapter_stub + "\n" + "\n".join(path.read_text() for path in CHAPTER_PARTS)
         summary = SUMMARY.read_text()
 
     if data:
@@ -184,14 +191,14 @@ def main() -> int:
             failures.append({"code": "SUMMARY_TOTAL_LINK_COUNT", "observed": total_links, "expected": 19})
 
     evidence = []
-    for path, kind in [(PROFILE,"profile"),(CHAPTER,"chapter"),(SUMMARY,"summary")]:
+    for path, kind in [(PROFILE,"profile"),(CHAPTER,"chapter_stub"), *[(part,"chapter_part") for part in CHAPTER_PARTS], (SUMMARY,"summary")]:
         if path.exists():
             evidence.append({
                 "kind": kind,
                 "path": str(path.relative_to(ROOT)),
                 "sha256": digest(path),
             })
-    subject = b"".join(path.read_bytes() for path in [PROFILE,CHAPTER,SUMMARY] if path.exists())
+    subject = b"".join(path.read_bytes() for path in [PROFILE,CHAPTER,*CHAPTER_PARTS,SUMMARY] if path.exists())
     report = {
         "schema": "aps.receipt.v26.7.31",
         "operation_id": "aps-v26.7.31-ggen-enterprise-architecture",
