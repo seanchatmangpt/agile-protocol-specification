@@ -1,0 +1,47 @@
+{
+  "schema": "aps.receipt.v26.7.31",
+  "operation_id": "aps-v26.7.31-ggen-enterprise-architecture",
+  "subject": "sha256:96cadf88e6c31d4586c649eee821cce7ee676190978adf0f81c397b5a1a89608",
+  "coordinate": {
+    "source": "seanchatmangpt/agile-protocol-specification",
+    "revision": "WORKTREE",
+    "command": "python3 specification-guide/scripts/verify_ea_strategy_v26_7_31.py",
+    "toolchain": "3.13.5",
+    "ggen_source_revision": "68952593c40214ac1a681073d65f3902a9cdfce4"
+  },
+  "standing": "ALIVE",
+  "metrics": {
+    "dimensions": 21,
+    "proof_obligations": 63,
+    "chapter_words": 3850,
+    "failures": 0
+  },
+  "failures": [],
+  "evidence": [
+    {
+      "kind": "profile",
+      "path": "specification-guide/standards/ggen-enterprise-architecture-v26.7.31.json",
+      "sha256": "d2fb0691db695abec202e714a5b994d29eb17e64d14023c46268bbdca9ab4e24"
+    },
+    {
+      "kind": "chapter",
+      "path": "specification-guide/src/v26_7_30/17_enterprise_architecture_as_strategy.md",
+      "sha256": "b0887a8d5acc060916e474689a6e55897d2fde065c0324985fc10551a693a42a"
+    },
+    {
+      "kind": "summary",
+      "path": "specification-guide/src/SUMMARY.md",
+      "sha256": "5c195666dcad1aa7b7489cef49c7eca1bb9ce4dc27a4ddd724b35059374ef2c3"
+    }
+  ],
+  "replay": {
+    "command": "python3 specification-guide/scripts/verify_ea_strategy_v26_7_31.py",
+    "expected": "MATCH"
+  },
+  "nonclaims": [
+    "ALIVE is bounded to APS profile structure and invariant verification.",
+    "The ggen enterprise-architecture implementation was not executed by this verifier.",
+    "Stage 5 is a ggen extension, not an original RWR maturity stage.",
+    "No production actuation authority is granted."
+  ]
+}
