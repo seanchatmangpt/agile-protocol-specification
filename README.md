@@ -8,20 +8,25 @@ APS is the input model for Gall checkpoint execution. APS declares what must be 
 
 ## Read the book
 
-The canonical source is `specification-guide/src/`. The v26.7.31 candidate retains the v26.7.30 edition path and contains 18 substantive mdBook chapters beginning at `specification-guide/src/v26_7_30/00_source_admission.md`.
+The canonical source is `specification-guide/src/`. The v26.7.31 candidate retains the v26.7.30 edition path and contains 18 top-level mdBook chapters plus one nested Enterprise Architecture as Strategy profile.
 
 The enterprise execution chapter is `specification-guide/src/v26_7_30/15_mcp_a2a_safe_simulation.md`. It is backed by an executable Rust package at `simulation/fortune5-safe/`.
 
 The ggen manufacturing profile is `specification-guide/src/v26_7_30/16_ggen_manufacturing_standard.md`, with a machine-readable conformance profile at `specification-guide/standards/ggen-v26.7.62.json`. It binds the standards admitted from `seanchatmangpt/ggen` release `26.7.62` at exact source revision `68952593c40214ac1a681073d65f3902a9cdfce4`.
 
+The nested Enterprise Architecture as Strategy profile is `specification-guide/src/v26_7_30/17_enterprise_architecture_as_strategy.md`, with a machine-readable maturity and proof contract at `specification-guide/standards/ggen-enterprise-architecture-v26.7.31.json`. It preserves the four RWR operating models and four original maturity stages, then fences ggen Stage 5 as an explicit extension requiring 21 conjunctive dimensions and 63 proof obligations at one exact coordinate.
+
 ## Validate the specification
 
 ```bash
 python3 specification-guide/scripts/verify_ggen_v26_7_31.py
+python3 specification-guide/scripts/verify_ea_strategy_v26_7_31.py
 python3 specification-guide/scripts/verify_v26_7_30.py
 ```
 
 The focused ggen verifier checks source provenance, ontology authority, deterministic projection, maximal frontmatter, typed refusal precedence, zero direct actuation, Building Block composition, BLAKE3 obligations, deterministic non-LLM self-play, Gall work orders, logical-time OCEL evidence, exact-head release law, exclusions, and falsifiers. It emits `receipts/APS-v26.7.31-ggen-standard.json`.
+
+The Enterprise Architecture as Strategy verifier checks the RWR fence, operating-model quadrants, original maturity stages, the explicit ggen Stage 5 extension, core-diagram closure, canonical graph authority, GBB/ABB/SBB distinctions, provider profiles, `gpc` aliasing, 21 maturity dimensions, exactly 63 proof obligations, Gall checkpoints, BRCE-only actuation, and same-object falsification. It emits `receipts/APS-v26.7.31-ggen-enterprise-architecture.json`.
 
 The book verifier checks chapter closure, schema validity, constitutional invariants, duplicate boilerplate, the MCP/A2A enterprise work order, and the simulation source surface. It emits `receipts/APS-v26.7.30-verifier.json`.
 
