@@ -16,3 +16,5 @@
 - [Templates, Glossary, and Frequently Asked Questions](v26_7_30/13_templates_glossary_faq.md)
 - [Change Log and Standards Map](v26_7_30/14_change_log_references.md)
 - [MCP and A2A Autonomics for a Fortune-5-Scale SAFe Enterprise](v26_7_30/15_mcp_a2a_safe_simulation.md)
+- [AI-Native Fortune-5 Operating Model](v26_7_30/16_ai_native_operating_model.md)
+- [ggen Manufacturing, Building Blocks, and Release Law](v26_7_30/16_ggen_manufacturing_standard.md)
