@@ -1,6 +1,6 @@
 # Agile Protocol Specification
 
-**Current candidate:** v26.7.30
+**Current candidate:** v26.7.31
 
 The Agile Protocol Specification (APS) is a machine-readable operating constitution for converting intent into deterministic, bounded work orders for human and agentic delivery systems. APS defines identity, lifecycle, authority, falsifiers, evidence contracts, typed outcomes, receipts, and replay.
 
@@ -8,17 +8,22 @@ APS is the input model for Gall checkpoint execution. APS declares what must be 
 
 ## Read the book
 
-The canonical source is `specification-guide/src/`. The v26.7.30 edition contains 16 substantive mdBook chapters beginning at `specification-guide/src/v26_7_30/00_source_admission.md`.
+The canonical source is `specification-guide/src/`. The v26.7.31 candidate retains the v26.7.30 edition path and contains 18 substantive mdBook chapters beginning at `specification-guide/src/v26_7_30/00_source_admission.md`.
 
 The enterprise execution chapter is `specification-guide/src/v26_7_30/15_mcp_a2a_safe_simulation.md`. It is backed by an executable Rust package at `simulation/fortune5-safe/`.
+
+The ggen manufacturing profile is `specification-guide/src/v26_7_30/16_ggen_manufacturing_standard.md`, with a machine-readable conformance profile at `specification-guide/standards/ggen-v26.7.62.json`. It binds the standards admitted from `seanchatmangpt/ggen` release `26.7.62` at exact source revision `68952593c40214ac1a681073d65f3902a9cdfce4`.
 
 ## Validate the specification
 
 ```bash
+python3 specification-guide/scripts/verify_ggen_v26_7_31.py
 python3 specification-guide/scripts/verify_v26_7_30.py
 ```
 
-The verifier checks chapter closure, schema validity, constitutional invariants, duplicate boilerplate, the MCP/A2A enterprise work order, and the simulation source surface. It emits `receipts/APS-v26.7.30-verifier.json`.
+The focused ggen verifier checks source provenance, ontology authority, deterministic projection, maximal frontmatter, typed refusal precedence, zero direct actuation, Building Block composition, BLAKE3 obligations, deterministic non-LLM self-play, Gall work orders, logical-time OCEL evidence, exact-head release law, exclusions, and falsifiers. It emits `receipts/APS-v26.7.31-ggen-standard.json`.
+
+The book verifier checks chapter closure, schema validity, constitutional invariants, duplicate boilerplate, the MCP/A2A enterprise work order, and the simulation source surface. It emits `receipts/APS-v26.7.30-verifier.json`.
 
 ## Run the Fortune-5-scale SAFe simulation
 
@@ -60,4 +65,4 @@ cd specification-guide
 mdbook build
 ```
 
-Compiled outputs are committed at `specification-guide/book/` and `specification-guide/dist/APS-v26.7.30.pdf`. The Markdown under `specification-guide/src/` remains canonical.
+Compiled outputs are committed at `specification-guide/book/` and `specification-guide/dist/APS-v26.7.30.pdf`. The Markdown under `specification-guide/src/` remains canonical. This change does not hand-edit compiled book or PDF outputs; release automation must regenerate them from canonical source.
