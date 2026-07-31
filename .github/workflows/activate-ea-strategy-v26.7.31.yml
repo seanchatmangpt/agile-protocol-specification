@@ -1,16 +1,15 @@
 name: Activate APS Enterprise Architecture as Strategy v26.7.31
 
 on:
-  push:
-    branches:
-      - agent/aps-last-7d-ggen-standards
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: aps-ea-strategy-activation-${{ github.ref }}
+  group: aps-ea-strategy-activation-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: false
 
 jobs:
@@ -24,7 +23,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Admit and extract bounded payload
         shell: bash
@@ -80,9 +79,10 @@ jobs:
       - name: Publish exact bounded tree and remove carrier
         shell: bash
         env:
-          TARGET_BRANCH: ${{ github.ref_name }}
+          TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           set -euo pipefail
+          test -n "$TARGET_BRANCH"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           rm -rf .aps-ea-strategy
