@@ -1,4 +1,4 @@
-name: Converge APS v26.7.31 Fortune-5 SAFe and ggen
+name: Converge APS v26.7.31 Fortune-5 SAFe, ggen, and EA
 
 on:
   pull_request:
@@ -6,48 +6,40 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: aps-v26.7.31-convergence-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
-  publish:
-    if: github.actor != 'github-actions[bot]'
+  verify-and-publish-artifact:
     runs-on: ubuntu-24.04
     timeout-minutes: 75
-
     steps:
       - name: Check out exact candidate
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-
-      - name: Establish canonical source coordinate
+      - name: Establish immutable source coordinate
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf .aps-enterprise-bootstrap
-          rm -f .github/workflows/publish-aps-v26.7.30.yml
+          test ! -e .aps-bootstrap
+          test ! -e .aps-safe-bootstrap
+          test ! -e .aps-enterprise-bootstrap
+          test ! -e .github/workflows/publish-aps-v26.7.30.yml
+          test -s .aps-syntax.md
           test -s simulation/fortune5-safe/Cargo.toml
-          test -s simulation/fortune5-safe/src/main.rs
-          test -s specification-guide/src/v26_7_30/16_ai_native_operating_model.md
+          test -s simulation/fortune5-safe/Cargo.lock
           test -s specification-guide/src/v26_7_30/16_ggen_manufacturing_standard.md
+          test -s specification-guide/src/v26_7_30/17_enterprise_architecture_as_strategy.md
           test -s specification-guide/standards/ggen-v26.7.62.json
-          test -s specification-guide/scripts/verify_ggen_v26_7_31.py
-          test -s specification-guide/scripts/verify_v26_7_30.py
-          grep -q '16_ai_native_operating_model.md' specification-guide/src/SUMMARY.md
-          grep -q '16_ggen_manufacturing_standard.md' specification-guide/src/SUMMARY.md
-          grep -q 'AI-Native' specification-guide/src/v26_7_30/16_ai_native_operating_model.md
-          grep -q 'MCP' specification-guide/src/v26_7_30/15_mcp_a2a_safe_simulation.md
-          grep -q 'A2A' specification-guide/src/v26_7_30/15_mcp_a2a_safe_simulation.md
-          chapter_count=$(grep -cE '^[-*] \[[^]]+\]\([^)]+\.md\)' specification-guide/src/SUMMARY.md)
-          test "$chapter_count" -eq 18
+          test -s specification-guide/standards/ggen-enterprise-architecture-v26.7.31.json
           echo "APS_SOURCE_REVISION=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
-
-      - name: Install stable Rust
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - name: Install Rust verification toolchain
         shell: bash
         run: |
           set -euo pipefail
@@ -55,45 +47,28 @@ jobs:
           rustup default stable
           rustc -Vv
           cargo -V
-
-      - name: Verify Rust workspace
+      - name: Verify Fortune-5 runtime and replay
         shell: bash
         run: |
           set -euo pipefail
           cargo fmt --manifest-path simulation/fortune5-safe/Cargo.toml --all -- --check
-          cargo test --manifest-path simulation/fortune5-safe/Cargo.toml --locked --all-targets
           cargo clippy --manifest-path simulation/fortune5-safe/Cargo.toml --locked --all-targets -- -D warnings
-          cargo build --release --manifest-path simulation/fortune5-safe/Cargo.toml --locked
-
-      - name: Exercise full-scale simulation and deterministic replay
+          cargo test --manifest-path simulation/fortune5-safe/Cargo.toml --locked --all-targets
+          cargo build --manifest-path simulation/fortune5-safe/Cargo.toml --locked --all-targets
+          python3 simulation/fortune5-safe/scripts/verify.py --require-cargo
+          test -s simulation/fortune5-safe/target/aps-safe-sim/verification-receipt.json
+      - name: Verify all canonical APS profiles and WIP closure
         shell: bash
         run: |
           set -euo pipefail
-          cargo run --release --manifest-path simulation/fortune5-safe/Cargo.toml --locked -p safe-simulator --example full_sim -- --seed 42 | tee /tmp/APS-v26.7.31-f5-simulation.log
-          cargo run --release --manifest-path simulation/fortune5-safe/Cargo.toml --locked -p safe-verifier --bin verifier -- --seed 42 --assert-invariants | tee /tmp/APS-v26.7.31-f5-verifier.log
-          test -s simulation/fortune5-safe/receipts/run-a.json
-          test -s simulation/fortune5-safe/receipts/run-b.json
-          cmp simulation/fortune5-safe/receipts/run-a.json simulation/fortune5-safe/receipts/run-b.json
-          test -s simulation/fortune5-safe/receipts/verifier-report.json
-
-      - name: Verify APS and ggen canonical profiles
-        shell: bash
-        run: |
-          set -euo pipefail
+          cp receipts/APS-v26.7.31-ggen-standard.json /tmp/expected-ggen.json
+          cp receipts/APS-v26.7.31-ggen-enterprise-architecture.json /tmp/expected-ea.json
           python3 specification-guide/scripts/verify_ggen_v26_7_31.py
-          python3 specification-guide/scripts/verify_v26_7_30.py
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          profile = json.loads(Path("specification-guide/standards/ggen-v26.7.62.json").read_text())
-          assert profile["source"]["revision"] == "68952593c40214ac1a681073d65f3902a9cdfce4"
-          assert profile["authority"]["canonical_authority"] == "ontology"
-          assert profile["authority"]["generated_outputs_are_authority"] is False
-          assert profile["actuation"]["direct_actuation_allowed"] is False
-          assert profile["receipt"]["ggen_algorithm"] == "BLAKE3"
-          assert profile["replay"]["refusal_precedence"][0] == "DuplicateReplay"
-          PY
-
+          python3 specification-guide/scripts/verify_ea_strategy_v26_7_31.py
+          cmp /tmp/expected-ggen.json receipts/APS-v26.7.31-ggen-standard.json
+          cmp /tmp/expected-ea.json receipts/APS-v26.7.31-ggen-enterprise-architecture.json
+          python3 specification-guide/scripts/verify_v26_7_31.py
+          python3 specification-guide/scripts/verify_wip_closure_v26_7_31.py
       - name: Install publication dependencies
         shell: bash
         run: |
@@ -106,12 +81,10 @@ jobs:
           test -n "$chrome"
           echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
           mdbook --version
-
-      - name: Compile and validate the 18-chapter book
+      - name: Build HTML and PDF projections
         shell: bash
         run: |
           set -euo pipefail
-          sed -i '/^multilingual = false$/d' specification-guide/book.toml
           rm -rf specification-guide/book
           mdbook build specification-guide 2>&1 | tee /tmp/APS-v26.7.31-mdbook-build.log
           test -s specification-guide/book/html/print.html
@@ -126,44 +99,39 @@ jobs:
           test "$bytes" -ge 250000
           echo "APS_PDF_PAGES=$pages" >> "$GITHUB_ENV"
           echo "APS_PDF_BYTES=$bytes" >> "$GITHUB_ENV"
-
       - name: Manufacture exact-head publication receipt
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import hashlib
-          import json
-          import os
           from pathlib import Path
-          import subprocess
-
+          import hashlib, json, os, subprocess
           pdf = Path("specification-guide/dist/APS-v26.7.31.pdf")
           evidence_paths = [
-              Path("simulation/fortune5-safe/receipts/run-a.json"),
-              Path("simulation/fortune5-safe/receipts/run-b.json"),
-              Path("simulation/fortune5-safe/receipts/verifier-report.json"),
-              Path("receipts/APS-v26.7.30-verifier.json"),
               Path("receipts/APS-v26.7.31-ggen-standard.json"),
+              Path("receipts/APS-v26.7.31-ggen-enterprise-architecture.json"),
+              Path("receipts/APS-v26.7.31-book-verifier.json"),
+              Path("receipts/APS-v26.7.31-wip-closure.json"),
+              Path("simulation/fortune5-safe/target/aps-safe-sim/verification-receipt.json"),
+              Path("simulation/fortune5-safe/target/aps-safe-sim/simulation-report.json"),
+              Path("simulation/fortune5-safe/target/aps-safe-sim/self-test.json"),
           ]
-          evidence = {
-              str(path): {
-                  "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-                  "bytes": path.stat().st_size,
-              }
-              for path in evidence_paths
-          }
+          for path in evidence_paths:
+              if not path.exists(): raise SystemExit(f"PUBLICATION_EVIDENCE_MISSING:{path}")
+          evidence = {str(path): {"sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "bytes": path.stat().st_size} for path in evidence_paths}
           receipt = {
-              "schema": "aps.fortune5-safe-ggen-publication.receipt.v26.7.31",
+              "schema": "aps.exact-head-publication.receipt.v26.7.31",
               "standing": "ALIVE",
               "subject": os.environ["APS_SOURCE_REVISION"],
-              "chapters": 18,
+              "repository": "seanchatmangpt/agile-protocol-specification",
+              "topology": {"topLevelChapters": 18, "totalChapters": 19},
               "ggen": {
                   "release": "26.7.62",
                   "sourceRevision": "68952593c40214ac1a681073d65f3902a9cdfce4",
                   "directActuationAllowed": False,
                   "executionReceiptAlgorithm": "BLAKE3",
               },
+              "enterpriseArchitecture": {"dimensions": 21, "proofObligations": 63, "stage5IsOriginalRwr": False},
               "toolchain": {
                   "rustc": subprocess.check_output(["rustc", "--version"], text=True).strip(),
                   "cargo": subprocess.check_output(["cargo", "--version"], text=True).strip(),
@@ -173,56 +141,47 @@ jobs:
               },
               "evidence": evidence,
               "pdf": {
-                  "path": str(pdf),
-                  "sha256": hashlib.sha256(pdf.read_bytes()).hexdigest(),
-                  "pages": int(os.environ["APS_PDF_PAGES"]),
-                  "bytes": int(os.environ["APS_PDF_BYTES"]),
+                  "path": str(pdf), "sha256": hashlib.sha256(pdf.read_bytes()).hexdigest(),
+                  "pages": int(os.environ["APS_PDF_PAGES"]), "bytes": int(os.environ["APS_PDF_BYTES"]),
               },
               "zeroUnreceiptedActuation": True,
-              "nonclaims": [
-                  "No production MCP, A2A, ggen, or BRCE endpoint was deployed.",
-                  "APS profile conformance does not claim the ggen implementation executed in this repository.",
-                  "Simulation standing does not grant production authority.",
-              ],
+              "repositoryMutation": False,
               "replay": [
-                  "cargo test --manifest-path simulation/fortune5-safe/Cargo.toml --locked --all-targets",
+                  "python3 simulation/fortune5-safe/scripts/verify.py --require-cargo",
                   "python3 specification-guide/scripts/verify_ggen_v26_7_31.py",
-                  "python3 specification-guide/scripts/verify_v26_7_30.py",
+                  "python3 specification-guide/scripts/verify_ea_strategy_v26_7_31.py",
+                  "python3 specification-guide/scripts/verify_v26_7_31.py",
+                  "python3 specification-guide/scripts/verify_wip_closure_v26_7_31.py",
                   "mdbook build specification-guide",
               ],
+              "nonclaims": [
+                  "No production MCP, A2A, ggen, or BRCE endpoint was deployed.",
+                  "The workflow artifact is not a release promotion grant.",
+                  "No real Fortune-5 company is represented.",
+                  "No generated output was pushed to the candidate branch.",
+              ],
           }
-          Path("receipts").mkdir(exist_ok=True)
-          Path("receipts/APS-v26.7.31-fortune5-safe-ggen-publication.json").write_text(
-              json.dumps(receipt, indent=2) + "\n"
-          )
+          Path("receipts/APS-v26.7.31-exact-head-publication.json").write_text(json.dumps(receipt, indent=2) + "\n")
           PY
-
-      - name: Commit generated publication surfaces
-        if: github.event_name == 'pull_request'
+      - name: Refuse canonical-source mutation
         shell: bash
-        env:
-          TARGET_BRANCH: ${{ github.head_ref }}
         run: |
           set -euo pipefail
-          test -n "$TARGET_BRANCH"
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add specification-guide/book specification-guide/dist receipts
-          git diff --cached --quiet && exit 0
-          git commit -m 'Publish APS v26.7.31 ggen-aligned book and receipts'
-          git pull --rebase origin "$TARGET_BRANCH"
-          git push origin "HEAD:$TARGET_BRANCH"
-
-      - name: Upload publication evidence
+          git diff --exit-code -- \
+            .aps-syntax.md README.md APS_V26_7_31_RELEASE_NOTES.md \
+            specification-guide/src specification-guide/scripts specification-guide/standards \
+            simulation/fortune5-safe/src simulation/fortune5-safe/tests simulation/fortune5-safe/config \
+            .github/workflows
+      - name: Upload immutable publication evidence
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
-          name: APS-v26.7.31-fortune5-safe-ggen-${{ github.event.pull_request.head.sha || github.sha }}
+          name: APS-v26.7.31-exact-head-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
+            specification-guide/book/html/
             specification-guide/dist/APS-v26.7.31.pdf
             receipts/APS-v26.7.31-*.json
-            receipts/APS-v26.7.30-verifier.json
-            simulation/fortune5-safe/receipts/*.json
-            /tmp/APS-v26.7.31-*.log
-          if-no-files-found: warn
+            simulation/fortune5-safe/target/aps-safe-sim/
+            /tmp/APS-v26.7.31-mdbook-build.log
+          if-no-files-found: error
           retention-days: 30
