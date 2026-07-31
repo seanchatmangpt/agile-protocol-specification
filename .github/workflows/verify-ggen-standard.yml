@@ -1,0 +1,74 @@
+name: Verify APS ggen Manufacturing Standard
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "README.md"
+      - ".aps-syntax.md"
+      - "specification-guide/src/SUMMARY.md"
+      - "specification-guide/src/v26_7_30/16_ggen_manufacturing_standard.md"
+      - "specification-guide/standards/ggen-v26.7.62.json"
+      - "specification-guide/scripts/verify_ggen_v26_7_31.py"
+      - "receipts/APS-v26.7.31-ggen-standard.json"
+      - ".github/workflows/verify-ggen-standard.yml"
+  push:
+    branches: [main]
+    paths:
+      - "README.md"
+      - ".aps-syntax.md"
+      - "specification-guide/src/SUMMARY.md"
+      - "specification-guide/src/v26_7_30/16_ggen_manufacturing_standard.md"
+      - "specification-guide/standards/ggen-v26.7.62.json"
+      - "specification-guide/scripts/verify_ggen_v26_7_31.py"
+      - "receipts/APS-v26.7.31-ggen-standard.json"
+      - ".github/workflows/verify-ggen-standard.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aps-ggen-standard-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Exact-source-set ggen profile verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Replay committed deterministic receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp receipts/APS-v26.7.31-ggen-standard.json /tmp/expected-ggen-receipt.json
+          python3 -m py_compile specification-guide/scripts/verify_ggen_v26_7_31.py
+          python3 specification-guide/scripts/verify_ggen_v26_7_31.py
+          cmp /tmp/expected-ggen-receipt.json receipts/APS-v26.7.31-ggen-standard.json
+      - name: Refuse direct actuation and generated authority
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          profile = json.loads(Path("specification-guide/standards/ggen-v26.7.62.json").read_text())
+          assert profile["actuation"]["direct_actuation_allowed"] is False
+          assert profile["actuation"]["exclusive_path"] == "BRCE"
+          assert profile["authority"]["generated_outputs_are_authority"] is False
+          assert profile["receipt"]["ggen_algorithm"] == "BLAKE3"
+          assert profile["replay"]["refusal_precedence"][0] == "DuplicateReplay"
+          PY
+      - name: Upload verifier receipt
+        if: always()
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
+        with:
+          name: aps-ggen-standard-${{ github.event.pull_request.head.sha || github.sha }}
+          path: receipts/APS-v26.7.31-ggen-standard.json
+          if-no-files-found: error
+          retention-days: 30

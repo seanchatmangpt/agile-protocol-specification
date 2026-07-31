@@ -1,0 +1,60 @@
+name: Verify APS v26.7.31 WIP Closure
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aps-wip-closure-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify no active WIP surfaces remain
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile \
+            specification-guide/scripts/verify_ggen_v26_7_31.py \
+            specification-guide/scripts/verify_ea_strategy_v26_7_31.py \
+            specification-guide/scripts/verify_v26_7_31.py \
+            specification-guide/scripts/verify_wip_closure_v26_7_31.py
+          python3 specification-guide/scripts/verify_wip_closure_v26_7_31.py
+      - name: Replay committed focused receipts
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp receipts/APS-v26.7.31-ggen-standard.json /tmp/expected-ggen.json
+          cp receipts/APS-v26.7.31-ggen-enterprise-architecture.json /tmp/expected-ea.json
+          python3 specification-guide/scripts/verify_ggen_v26_7_31.py
+          python3 specification-guide/scripts/verify_ea_strategy_v26_7_31.py
+          cmp /tmp/expected-ggen.json receipts/APS-v26.7.31-ggen-standard.json
+          cmp /tmp/expected-ea.json receipts/APS-v26.7.31-ggen-enterprise-architecture.json
+      - name: Verify complete candidate source with include expansion
+        run: python3 specification-guide/scripts/verify_v26_7_31.py
+      - name: Upload closure receipts
+        if: always()
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
+        with:
+          name: APS-v26.7.31-wip-closure-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            receipts/APS-v26.7.31-wip-closure.json
+            receipts/APS-v26.7.31-book-verifier.json
+            receipts/APS-v26.7.31-ggen-standard.json
+            receipts/APS-v26.7.31-ggen-enterprise-architecture.json
+          if-no-files-found: error
+          retention-days: 30

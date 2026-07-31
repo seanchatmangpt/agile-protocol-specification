@@ -2,7 +2,7 @@
 authors = ["Sean Chatman"]
 language = "en"
 src = "src"
-title = "Agile Protocol Specification v26.7.30"
+title = "Agile Protocol Specification v26.7.31"
 description = "A normative operating constitution for deterministic, evidence-bound human and agentic delivery."
 
 [build]

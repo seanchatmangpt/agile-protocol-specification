@@ -1,63 +1,74 @@
 # Agile Protocol Specification
 
-**Current candidate:** v26.7.30
+**Current candidate:** v26.7.31  
+**Last immutable published projection:** v26.7.30
 
 The Agile Protocol Specification (APS) is a machine-readable operating constitution for converting intent into deterministic, bounded work orders for human and agentic delivery systems. APS defines identity, lifecycle, authority, falsifiers, evidence contracts, typed outcomes, receipts, and replay.
 
-APS is the input model for Gall checkpoint execution. APS declares what must be attempted and what evidence would count; Gall observes checkpoint execution and assigns bounded standing.
+APS is the input model for Gall checkpoint execution. APS declares what must be true before work begins. Gall observes execution and assigns bounded standing. BRCE remains the exclusive consequential DO path.
 
-## Read the book
+## Canonical source
 
-The canonical source is `specification-guide/src/`. The v26.7.30 edition contains 16 substantive mdBook chapters beginning at `specification-guide/src/v26_7_30/00_source_admission.md`.
+The canonical source is `specification-guide/src/`. The v26.7.31 candidate retains the v26.7.30 source path, with 18 top-level mdBook chapters and one nested Enterprise Architecture as Strategy chapter.
 
-The enterprise execution chapter is `specification-guide/src/v26_7_30/15_mcp_a2a_safe_simulation.md`. It is backed by an executable Rust package at `simulation/fortune5-safe/`.
+The principal current profiles are:
 
-## Validate the specification
+- Fortune-5 MCP/A2A simulation: `specification-guide/src/v26_7_30/15_mcp_a2a_safe_simulation.md`
+- AI-native operating model: `specification-guide/src/v26_7_30/16_ai_native_operating_model.md`
+- ggen manufacturing standard: `specification-guide/src/v26_7_30/16_ggen_manufacturing_standard.md`
+- Enterprise Architecture as Strategy: `specification-guide/src/v26_7_30/17_enterprise_architecture_as_strategy.md`
+
+The machine-readable ggen profiles are:
+
+- `specification-guide/standards/ggen-v26.7.62.json`
+- `specification-guide/standards/ggen-enterprise-architecture-v26.7.31.json`
+
+The admitted ggen source coordinate is release `26.7.62` at revision `68952593c40214ac1a681073d65f3902a9cdfce4`.
+
+## Syntax
+
+The stable root syntax entry point is `.aps-syntax.md`. The normative semantics, lifecycle calculus, conformance profiles, work-order schema, and receipt schema remain in the mdBook and `specification-guide/schemas/`.
+
+## Validate canonical source
 
 ```bash
-python3 specification-guide/scripts/verify_v26_7_30.py
+python3 specification-guide/scripts/verify_ggen_v26_7_31.py
+python3 specification-guide/scripts/verify_ea_strategy_v26_7_31.py
+python3 specification-guide/scripts/verify_v26_7_31.py
+python3 specification-guide/scripts/verify_wip_closure_v26_7_31.py
 ```
 
-The verifier checks chapter closure, schema validity, constitutional invariants, duplicate boilerplate, the MCP/A2A enterprise work order, and the simulation source surface. It emits `receipts/APS-v26.7.30-verifier.json`.
+The focused verifiers emit deterministic source-set receipts:
 
-## Run the Fortune-5-scale SAFe simulation
+- `receipts/APS-v26.7.31-ggen-standard.json`
+- `receipts/APS-v26.7.31-ggen-enterprise-architecture.json`
 
-The fictional scale profile contains 5 portfolios, 20 development value streams, 40 Solution Trains, 80 ARTs, 800 teams, and 7,200 delivery personnel. MCP is the tool and context plane. A2A is the peer-agent task plane. All policy-governed state mutation passes through an exclusive actuation broker and hash-chained receipt ledger.
+The full candidate verifier expands mdBook includes before checking chapter substance and emits `receipts/APS-v26.7.31-book-verifier.json`. The WIP verifier emits `receipts/APS-v26.7.31-wip-closure.json` as an exact-tree workflow artifact.
+
+## Run the Fortune-5 simulation
 
 ```bash
-cargo test --manifest-path simulation/fortune5-safe/Cargo.toml --all-targets
 python3 simulation/fortune5-safe/scripts/verify.py --require-cargo
 ```
 
-The MCP server can also run as a persistent stdio JSON-RPC session, while the A2A harness preserves task state across JSONL requests:
+The verifier exercises Rust formatting and tests, MCP and A2A fixtures, stdio and JSONL sessions, deterministic simulation, negative fixtures, receipt-chain invariants, and same-coordinate replay.
+
+## Build projections
 
 ```bash
-cargo run --manifest-path simulation/fortune5-safe/Cargo.toml -- mcp-stdio \
-  --config simulation/fortune5-safe/config/fortune5-enterprise.json \
-  --scenario simulation/fortune5-safe/config/global-core-modernization.json
+mdbook build specification-guide
 ```
 
-A deterministic scenario can be run directly:
+The Markdown source remains authority. HTML, PDF, diagrams, schemas generated from other authority, and workflow artifacts are projections or evidence surfaces.
 
-```bash
-cargo run --manifest-path simulation/fortune5-safe/Cargo.toml -- \
-  simulate \
-  --config simulation/fortune5-safe/config/fortune5-enterprise.json \
-  --scenario simulation/fortune5-safe/config/global-core-modernization.json \
-  --out simulation/fortune5-safe/target/aps-safe-sim/simulation-report.json
-```
+The committed v26.7.30 book and PDF remain the last immutable published projections. Pull-request workflows build the v26.7.31 HTML, PDF, simulation receipts, and exact-head publication receipt as immutable GitHub Actions artifacts. They do not repair source, commit generated files, or push the PR branch. Promotion into committed release outputs requires a separate explicit release actuation after all exact-head checks pass.
 
-The simulator is company-neutral and does not represent a real Fortune 5 corporation. Its MCP 2025-11-25 and A2A 1.0.0 surfaces are bounded semantic profiles, not full network conformance or certification claims.
+## Hard invariants
 
-## Build the book and PDF
-
-The release branch compiles mdBook and the PDF backend from Rust crates, then runs a single mdBook build:
-
-```bash
-cargo install mdbook --version 0.5.4 --locked
-cargo install mdbook-pdf --version 0.1.13 --locked
-cd specification-guide
-mdbook build
-```
-
-Compiled outputs are committed at `specification-guide/book/` and `specification-guide/dist/APS-v26.7.30.pdf`. The Markdown under `specification-guide/src/` remains canonical.
+- Generated outputs are not independent authority.
+- Lifecycle and evidentiary standing are separate.
+- `UNKNOWN` is not permission to claim success.
+- Direct architecture autonomics may observe, diagnose, plan, and emit intent; BRCE owns DO.
+- Zero unreceipted actuation.
+- Exact-head evidence is required for promotion.
+- Stage 5 is a ggen extension, not an original RWR maturity stage.

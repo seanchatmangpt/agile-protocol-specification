@@ -1,0 +1,226 @@
+{
+  "schema": "aps.ggen.profile.v26.7.31",
+  "profile_id": "https://chatmangpt.com/id/aps/profile/ggen/26.7.62",
+  "standing": "ADMITTED",
+  "observation_window": {
+    "start": "2026-07-23T00:00:00-07:00",
+    "end": "2026-07-30T21:50:00-07:00",
+    "timezone": "America/Los_Angeles"
+  },
+  "source": {
+    "repository": "seanchatmangpt/ggen",
+    "release": "26.7.62",
+    "revision": "68952593c40214ac1a681073d65f3902a9cdfce4",
+    "consolidation_merge": "faa52dac474d456ae00105869770161d666ba31f",
+    "exact_aggregate_head": "036ab703e885aff90a79536a5db5b24608e8a32f"
+  },
+  "authority": {
+    "canonical_authority": "ontology",
+    "generated_outputs_are_authority": false,
+    "hand_edit_generated_outputs": "REFUSED",
+    "second_sync_expected": "BYTE_IDENTICAL"
+  },
+  "calculus": ["parse", "route", "admit_or_refuse", "diagnose_or_repair", "construct", "actuate", "receipt", "replay_or_hook"],
+  "states": ["PARTIAL_ALIVE", "ALIVE", "BLOCKED", "BUILD_BROKEN", "UNKNOWN", "UNSUPPORTED"],
+  "evidence_ladder": ["unit", "integration", "e2e", "chaos", "stress", "benchmark", "verifier_report"],
+  "actuation": {
+    "direct_actuation_allowed": false,
+    "exclusive_path": "BRCE",
+    "invariant": "Zero unreceipted actuation"
+  },
+  "receipt": {
+    "ggen_algorithm": "BLAKE3",
+    "binds": ["authority", "admitted_inputs", "ordered_outputs", "operation", "standing", "lineage", "replay_contract"],
+    "independent_replay_required": true
+  },
+  "replay": {
+    "exact_output_required": true,
+    "refusal_precedence": ["DuplicateReplay", "ChainPositionViolation"],
+    "refusal_preserves_state": true
+  },
+  "building_blocks": {
+    "canonical_kernel_count": 1,
+    "lifecycle_separate_from_standing": true,
+    "profile_conflict": "TYPED_REFUSAL",
+    "composition_identity": "BLAKE3"
+  },
+  "self_play": {
+    "llm_calls_allowed": false,
+    "actors": "EXPLICIT_STATE_MACHINES",
+    "required_boundaries": ["filesystem", "process", "state"],
+    "receipt_replay_required": true
+  },
+  "work_orders": {
+    "requires": ["MUST", "MUST_NOT", "allowed_paths", "forbidden_paths", "out_of_scope", "dependencies", "acceptance_commands", "evidence", "assignee", "reviewer", "authority", "falsifier"],
+    "dependency_graph": "ACYCLIC",
+    "empty_dependencies": "EMPTY_SET"
+  },
+  "standards": [
+    {
+      "id": "GGEN-AUTH-001",
+      "title": "Ontology authority and deterministic projection",
+      "law": "The admitted ontology, policy, and graph are authority; generated artifacts are projections.",
+      "admission": "ADMITTED",
+      "obligations": ["Name authority, generator coordinate, generated paths, and replay command.", "Refuse hand-authored mutation of generated surfaces.", "Require second-sync byte identity."],
+      "exclusions": ["Does not require every repository to commit generated outputs.", "Does not make metadata evidence of execution."],
+      "falsifier": "Mutate a generated output without changing its authority inputs; drift must be refused.",
+      "source_evidence": ["ggen:combinatorial-maximalism", "ggen:root-dogfood"]
+    },
+    {
+      "id": "GGEN-CALC-001",
+      "title": "Law-state manufacturing calculus",
+      "law": "Manufacturing follows parse, route, admit/refuse, diagnose/repair, construct, actuate, receipt, replay/hook.",
+      "admission": "ADMITTED",
+      "obligations": ["Declare the stage changed by each work item.", "Keep construction, actuation, verification, and standing distinct."],
+      "exclusions": ["Diagnosis has no inherited actuation authority."],
+      "falsifier": "Attempt actuation from diagnosis; the broker must refuse it.",
+      "source_evidence": ["ggen:architecture-autonomics"]
+    },
+    {
+      "id": "GGEN-FM-001",
+      "title": "Maximal frontmatter",
+      "law": "Frontmatter is a complete admission carrier with identity, authority, constraints, evidence, replay, and nonclaims.",
+      "admission": "ADMITTED",
+      "obligations": ["Preserve meaningful fields across projections.", "Separate lifecycle from standing.", "Include MUST/MUST NOT and allowed/forbidden paths."],
+      "exclusions": ["Serialization syntax is not fixed to one format."],
+      "falsifier": "Round-trip a record while deleting a MUST NOT boundary; the projection must refuse loss.",
+      "source_evidence": ["ggen:frontmatter-best-practices"]
+    },
+    {
+      "id": "GGEN-REFUSE-001",
+      "title": "Typed refusal and deterministic precedence",
+      "law": "Refusals are typed, state-preserving, externally visible, and precedence-tested.",
+      "admission": "ADMITTED",
+      "obligations": ["Dry-run performs no mutation.", "DuplicateReplay identity is checked before chain position.", "Refused replay preserves verifier state."],
+      "exclusions": ["UNKNOWN is not a refusal.", "UNSUPPORTED is not coerced into policy denial."],
+      "falsifier": "Replay a duplicate out of order; expect DuplicateReplay and identical pre/post state.",
+      "source_evidence": ["ggen:certification-assist"]
+    },
+    {
+      "id": "GGEN-ACT-001",
+      "title": "Zero direct actuation",
+      "law": "Architecture autonomics manufacture intents; BRCE owns the exclusive actuation path.",
+      "admission": "ADMITTED",
+      "obligations": ["Set direct_actuation_allowed to false.", "Name broker capability for every mutation.", "Receipt every external consequence."],
+      "exclusions": ["No production actuation authority is granted by this profile."],
+      "falsifier": "Set direct_actuation_allowed true; doctor and controller must refuse.",
+      "source_evidence": ["ggen:architecture-autonomics"]
+    },
+    {
+      "id": "GGEN-GBB-001",
+      "title": "Canonical Building Block kernel",
+      "law": "One architecture kernel composes deterministic profiles with lifecycle and standing kept separate.",
+      "admission": "ADMITTED",
+      "obligations": ["Expose one canonical kernel and CLI facade.", "Refuse profile conflicts.", "BLAKE3-receipt ordered composition inputs."],
+      "exclusions": ["Domain profiles do not become second kernels."],
+      "falsifier": "Create two conflicting profile claims; composition must return a typed conflict independent of input order.",
+      "source_evidence": ["ggen:gbb-kernel"]
+    },
+    {
+      "id": "GGEN-CMD-001",
+      "title": "Combinatorial maximalism",
+      "law": "Maximize reversible graph construction under fail-closed gates before bounded atomic actuation.",
+      "admission": "ADMITTED",
+      "obligations": ["Report explored, admitted, and refused combinations.", "Use fail-closed semantic gates.", "Use sabotage fixtures and exact-output replay."],
+      "exclusions": ["Large output volume alone is not conformance."],
+      "falsifier": "Disable one authority-bypass gate; a sabotage fixture must survive and fail the verifier.",
+      "source_evidence": ["ggen:combinatorial-maximalism-pack"]
+    },
+    {
+      "id": "GGEN-PLAY-001",
+      "title": "Deterministic non-LLM self-play",
+      "law": "Self-play uses ontology-authored scenarios, explicit actor state machines, real boundaries, receipts, and replay.",
+      "admission": "ADMITTED",
+      "obligations": ["No LLM calls in deterministic crown.", "Publish transition tables and boundary evidence.", "Preserve deterministic ordering."],
+      "exclusions": ["A transcript without executed boundaries is not evidence."],
+      "falsifier": "Replace a real filesystem transition with a stub; multi-surface verification must fail.",
+      "source_evidence": ["ggen:non-llm-safe-ea-self-play"]
+    },
+    {
+      "id": "GGEN-STAND-001",
+      "title": "Multi-surface capability standing",
+      "law": "ALIVE requires same-object execution evidence corroborated across multiple proof surfaces.",
+      "admission": "ADMITTED",
+      "obligations": ["Name capability count and proof-surface count.", "Bind command, revision, inputs, outputs, failures, and nonclaims.", "Use at least three relevant surfaces for crown claims."],
+      "exclusions": ["Multiple adjacent demonstrations do not corroborate a missing consequence."],
+      "falsifier": "Remove the causality surface while preserving logs; the crown must downgrade.",
+      "source_evidence": ["ggen:verification-constitution", "ggen:capability-standing"]
+    },
+    {
+      "id": "GGEN-GALL-001",
+      "title": "Gall-grade deterministic work orders",
+      "law": "Checkpoint graphs project to dependency-closed tickets with complete contracts and executable acceptance.",
+      "admission": "ADMITTED",
+      "obligations": ["Require MUST/MUST_NOT clauses.", "Require allowed/forbidden paths and out-of-scope.", "Require DAG dependencies, evidence, roles, and falsifier."],
+      "exclusions": ["An empty dependency set is valid and must not be replaced with invented edges."],
+      "falsifier": "Introduce a dependency cycle or orphan ticket; projection must refuse.",
+      "source_evidence": ["ggen:gall-work-orders"]
+    },
+    {
+      "id": "GGEN-OCEL-001",
+      "title": "Logical-time OCEL evidence",
+      "law": "Causal order uses admitted logical time and stable identities rather than wall-clock time alone.",
+      "admission": "ADMITTED",
+      "obligations": ["Link events to work order, actor, artifact, capability, and receipt.", "Preserve event identity and order across replay."],
+      "exclusions": ["Wall-clock time may remain an observation."],
+      "falsifier": "Replay with different wall-clock timing; causal event order must match.",
+      "source_evidence": ["ggen:logical-time-powl-ocel"]
+    },
+    {
+      "id": "GGEN-PROOF-001",
+      "title": "ggen-first Lean 4 to Rust admission",
+      "law": "Rendering, theorem admission, projection compilation, runtime execution, and certification retain separate standing.",
+      "admission": "ADMITTED",
+      "obligations": ["Bind theorem and Lean kernel result.", "Bind generated projection digest and compiler coordinate.", "Correlate runtime verifier and receipt."],
+      "exclusions": ["Generated Rust is not itself a Lean proof."],
+      "falsifier": "Change the Rust projection while retaining theorem identity; correspondence verification must fail.",
+      "source_evidence": ["ggen:ggen-first-lean4-rust"]
+    },
+    {
+      "id": "GGEN-REL-001",
+      "title": "Exact-head release law",
+      "law": "Promotion evidence binds to the exact candidate commit and exact required checks.",
+      "admission": "ADMITTED",
+      "obligations": ["Checkout exact PR head or current commit.", "Pin immutable action revisions.", "Avoid hidden merge-queue coupling and make finalizers replay-safe."],
+      "exclusions": ["A finalizer name does not imply crown completeness."],
+      "falsifier": "Move the candidate head after verification; promotion must refuse stale evidence.",
+      "source_evidence": ["ggen:exact-head-finalizer", "ggen:release-law"]
+    },
+    {
+      "id": "GGEN-ID-001",
+      "title": "Public namespace and identity",
+      "law": "Public object identity is distinct from repository location; metadata never implies standing.",
+      "admission": "ADMITTED",
+      "obligations": ["Use https://chatmangpt.com namespace origin.", "Keep repository identity and public object identity separate.", "Keep standing UNKNOWN until evidence exists."],
+      "exclusions": ["Dereferenceability is desired where practical, not proof of execution."],
+      "falsifier": "Rename a repository; public object identity must remain stable.",
+      "source_evidence": ["ggen:chatmangpt-namespace"]
+    },
+    {
+      "id": "GGEN-DRYRUN-001",
+      "title": "Dry-run refusal ordering",
+      "law": "Dry-run evaluates the same admission and refusal ordering while performing zero mutation.",
+      "admission": "ADMITTED",
+      "obligations": ["Record state_before and state_after.", "Assert equality when actuation is refused or dry-run is active."],
+      "exclusions": ["Dry-run success is not evidence that real actuation succeeded."],
+      "falsifier": "Run dry-run against a forbidden operation; expect the same typed refusal and no state delta.",
+      "source_evidence": ["ggen:typed-dry-run"]
+    },
+    {
+      "id": "GGEN-REPLAY-001",
+      "title": "Independent BLAKE3 receipt replay",
+      "law": "Receipts bind current authority, ordered inputs, exact outputs, consequence identity, lineage, and replay.",
+      "admission": "ADMITTED",
+      "obligations": ["Use BLAKE3 for ggen execution and composition identities.", "Verify receipt independently of producer success claims.", "Treat stale receipts as BUILD_BROKEN until regenerated."],
+      "exclusions": ["APS book receipts may retain their declared SHA-256 schema; this does not weaken ggen execution receipt law."],
+      "falsifier": "Modify one output byte and replay; exact-output verification must diverge.",
+      "source_evidence": ["ggen:receipt-check", "ggen:replay"]
+    }
+  ],
+  "nonclaims": [
+    "APS did not execute the ggen implementation while admitting this profile.",
+    "This profile does not grant production actuation authority.",
+    "The source coordinate bounds admitted standards; it does not claim every ggen capability is complete.",
+    "ALIVE remains reserved for observed execution at the declared coordinate."
+  ]
+}
