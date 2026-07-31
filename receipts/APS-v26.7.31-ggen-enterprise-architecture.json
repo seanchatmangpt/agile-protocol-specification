@@ -1,7 +1,7 @@
 {
   "schema": "aps.receipt.v26.7.31",
   "operation_id": "aps-v26.7.31-ggen-enterprise-architecture",
-  "subject": "sha256:0292fc951cd1d75de93d7256a21d9cb7720c03f35dd7e376cea6f00997b339f6",
+  "subject": "sha256:7b7d524da6246db816ba65fd4c06afa46bc8bd3857483530f8f00c6b1aea4597",
   "coordinate": {
     "source": "seanchatmangpt/agile-protocol-specification",
     "revision": "WORKTREE",
@@ -21,7 +21,7 @@
     {
       "kind": "profile",
       "path": "specification-guide/standards/ggen-enterprise-architecture-v26.7.31.json",
-      "sha256": "d2fb0691db695abec202e714a5b994d29eb17e64d14023c46268bbdca9ab4e24"
+      "sha256": "d3b3d87b8b88b649288cb3d3096f6a892484665736d904860f1a6357ff23f557"
     },
     {
       "kind": "chapter_stub",
