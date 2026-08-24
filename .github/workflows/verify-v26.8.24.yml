@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m py_compile tools/verify.py tools/simulate_fortune500.py tests/*.py
+          python3 -m py_compile tools/verify.py tools/verify_ggen_ecosystem.py tools/simulate_fortune500.py tests/*.py
 
       - name: Install pinned semantic qualification stack
         shell: bash
@@ -44,12 +44,148 @@ jobs:
           set -euo pipefail
           python3 -m pip install --disable-pip-version-check -r tools/requirements-ci.txt
 
-      - name: Qualify whole repository
+      - name: Qualify whole repository and ggen consumer contract
         shell: bash
         run: |
           set -euo pipefail
           python3 tools/verify.py --receipt /tmp/aps-repository-receipt.json
+          python3 tools/verify_ggen_ecosystem.py | tee /tmp/aps-ggen-static-court.json
           python3 -m unittest discover -s tests -v
+
+      - name: Load exact ggen ecosystem coordinates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_ENV"
+          import json
+          from pathlib import Path
+          lock = json.loads(Path('specification-guide/manufacturing/ecosystem.lock.json').read_text())
+          g = lock['ggen']
+          m = lock['marketplace']
+          print(f"GGEN_VERSION={g['version']}")
+          print(f"GGEN_COMMIT={g['commit']}")
+          print(f"GGEN_RELEASE_TAG={g['releaseTag']}")
+          print(f"GGEN_ASSET={g['asset']}")
+          print(f"GGEN_ASSET_SHA256={g['assetSha256']}")
+          print(f"GGEN_MARKETPLACE_COMMIT={m['commit']}")
+          print(f"GGEN_MARKETPLACE_PACK={m['pack']}")
+          PY
+
+      - name: Resolve and verify exact ggen ecosystem
+        shell: bash
+        run: |
+          set -euo pipefail
+          release_dir="$RUNNER_TEMP/ggen-release"
+          market_dir="$RUNNER_TEMP/ggen-marketplace"
+          mkdir -p "$release_dir" "$market_dir"
+
+          asset="$RUNNER_TEMP/$GGEN_ASSET"
+          curl -fsSL --retry 5 --retry-all-errors \
+            "https://github.com/seanchatmangpt/ggen/releases/download/$GGEN_RELEASE_TAG/$GGEN_ASSET" \
+            -o "$asset"
+          echo "$GGEN_ASSET_SHA256  $asset" | sha256sum -c -
+          tar -xzf "$asset" -C "$release_dir"
+          ggen_bin="$(find "$release_dir" -type f -name ggen | head -n 1)"
+          test -n "$ggen_bin"
+          chmod +x "$ggen_bin"
+          "$ggen_bin" --version | tee /tmp/aps-ggen-version.txt
+          grep -F "$GGEN_VERSION" /tmp/aps-ggen-version.txt
+          echo "GGEN_BIN=$ggen_bin" >> "$GITHUB_ENV"
+
+          git -C "$market_dir" init -q
+          git -C "$market_dir" remote add origin https://github.com/seanchatmangpt/ggen-marketplace.git
+          git -C "$market_dir" fetch -q --depth 1 origin "$GGEN_MARKETPLACE_COMMIT"
+          git -C "$market_dir" checkout -q --detach FETCH_HEAD
+          test "$(git -C "$market_dir" rev-parse HEAD)" = "$GGEN_MARKETPLACE_COMMIT"
+          echo "GGEN_MARKETPLACE_ROOT=$market_dir" >> "$GITHUB_ENV"
+
+          python3 - <<'PY' > /tmp/aps-expected-pack-blobs.txt
+          import json
+          from pathlib import Path
+          lock = json.loads(Path('specification-guide/manufacturing/ecosystem.lock.json').read_text())
+          for path, sha in lock['marketplace']['blobs'].items():
+              print(sha, path)
+          PY
+          while read -r expected path; do
+            actual="$(git -C "$market_dir" hash-object "packs/$GGEN_MARKETPLACE_PACK/$path")"
+            test "$actual" = "$expected"
+          done < /tmp/aps-expected-pack-blobs.txt
+
+      - name: Manufacture APS mdBook control surface with ggen marketplace
+        shell: bash
+        run: |
+          set -euo pipefail
+          consumer="$RUNNER_TEMP/aps-ggen-consumer"
+          evidence="/tmp/aps-ggen-evidence"
+          rm -rf "$consumer" "$evidence"
+          mkdir -p "$consumer" "$evidence"
+          cp -R specification-guide/manufacturing/. "$consumer/"
+          mkdir -p "$consumer/packs" "$consumer/templates"
+          cp -R "$GGEN_MARKETPLACE_ROOT/packs/$GGEN_MARKETPLACE_PACK" "$consumer/packs/"
+
+          cd "$consumer"
+          "$GGEN_BIN" sync run
+          cp docs/SUMMARY.md "$evidence/SUMMARY.pass1.md"
+          cp book.toml "$evidence/book.pass1.toml"
+          "$GGEN_BIN" receipt verify | tee "$evidence/receipt-verify-pass1.txt"
+
+          "$GGEN_BIN" sync run
+          "$GGEN_BIN" receipt verify | tee "$evidence/receipt-verify-pass2.txt"
+          cmp "$evidence/SUMMARY.pass1.md" docs/SUMMARY.md
+          cmp "$evidence/book.pass1.toml" book.toml
+          cmp docs/SUMMARY.md "$GITHUB_WORKSPACE/specification-guide/src/SUMMARY.md"
+
+          python3 - <<'PY'
+          import tomllib
+          from pathlib import Path
+          generated = tomllib.loads(Path('book.toml').read_text())
+          committed = tomllib.loads((Path.cwd().parents[1] / 'work' / 'agile-protocol-specification' / 'agile-protocol-specification' / 'specification-guide' / 'book.toml').read_text()) if False else tomllib.loads(Path(__import__('os').environ['GITHUB_WORKSPACE'], 'specification-guide', 'book.toml').read_text())
+          checks = [
+              (generated['book']['title'], committed['book']['title'], 'title'),
+              (generated['book']['authors'], committed['book']['authors'], 'authors'),
+              (generated['book']['description'], committed['book']['description'], 'description'),
+              (generated['book']['language'], committed['book']['language'], 'language'),
+              (generated['book']['src'], committed['book']['src'], 'src'),
+              (generated['build']['build-dir'], committed['build']['build-dir'], 'build-dir'),
+              (generated['build']['create-missing'], committed['build']['create-missing'], 'create-missing'),
+          ]
+          for actual, expected, name in checks:
+              assert actual == expected, (name, actual, expected)
+          PY
+
+          cp docs/SUMMARY.md "$evidence/SUMMARY.manufactured.md"
+          cp book.toml "$evidence/book.manufactured.toml"
+          cp /tmp/aps-ggen-version.txt "$evidence/ggen-version.txt"
+          python3 - <<'PY' > "$evidence/manufacture.json"
+          import hashlib, json, os
+          from pathlib import Path
+          root = Path('.')
+          lock = json.loads((root / 'ecosystem.lock.json').read_text())
+          def digest(path):
+              return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+          print(json.dumps({
+              'schema': 'aps.ggen-manufacture-evidence.v26.8.24',
+              'standing': 'ALIVE',
+              'apsHead': os.environ['APS_SOURCE_REVISION'],
+              'ggen': lock['ggen'],
+              'marketplace': lock['marketplace'],
+              'outputs': {
+                  'docs/SUMMARY.md': digest('docs/SUMMARY.md'),
+                  'book.toml': digest('book.toml')
+              },
+              'claims': [
+                  'Pinned ggen executed successfully.',
+                  'Pinned marketplace pack manufactured APS mdBook control projections.',
+                  'ggen receipt verification passed after both manufactures.',
+                  'Second manufacture was byte-identical for qualified projections.',
+                  'Manufactured SUMMARY.md is byte-identical to the committed APS projection.'
+              ],
+              'nonClaims': [
+                  'This does not prove complete APS self-hosting.',
+                  'This grants no production DO authority.'
+              ]
+          }, indent=2, sort_keys=True))
+          PY
 
       - name: Install mdBook
         uses: peaceiris/actions-mdbook@ee69d230fe19748b7abf22df32acaa93833fad08
@@ -78,7 +214,7 @@ jobs:
           assert r['evidenceClass'] == 'SYNTHETIC_SENSITIVITY_MODEL_NOT_FORECAST', r
           PY
 
-      - name: Assert verifier is read-only on repository
+      - name: Assert qualification is read-only on repository
         shell: bash
         run: |
           set -euo pipefail
@@ -92,6 +228,8 @@ jobs:
           name: APS-v26.8.24-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             /tmp/aps-repository-receipt.json
+            /tmp/aps-ggen-static-court.json
             /tmp/aps-f500-sensitivity.json
+            /tmp/aps-ggen-evidence/**
           if-no-files-found: warn
           retention-days: 30

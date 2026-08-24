@@ -5,6 +5,7 @@ deps:
 
 verify:
 	python3 tools/verify.py --no-receipt
+	python3 tools/verify_ggen_ecosystem.py
 
 test:
 	python3 -m unittest discover -s tests -v

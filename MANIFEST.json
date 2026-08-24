@@ -10,7 +10,10 @@
   "authority": {
     "syntax": ".aps-syntax.md",
     "book": "specification-guide/src/v26_8_24",
-    "navigation": "specification-guide/src/SUMMARY.md",
+    "navigationProjection": "specification-guide/src/SUMMARY.md",
+    "navigationKnowledge": "specification-guide/manufacturing/docs/book.ttl",
+    "manufacturingConsumer": "specification-guide/manufacturing/ggen.toml",
+    "manufacturingLock": "specification-guide/manufacturing/ecosystem.lock.json",
     "ontology": [
       "ontology/aps-core.ttl",
       "ontology/aps-shapes.ttl",
@@ -22,6 +25,7 @@
   },
   "executableQualification": {
     "repositoryVerifier": "tools/verify.py",
+    "ggenEcosystemVerifier": "tools/verify_ggen_ecosystem.py",
     "qualificationDependencies": "tools/requirements-ci.txt",
     "tests": "tests/",
     "syntheticEnterpriseModel": "tools/simulate_fortune500.py",
@@ -29,6 +33,7 @@
   },
   "evidence": {
     "activeReceipts": "GitHub Actions exact-head artifacts",
+    "ggenReceiptPolicy": "Exact-head CI must execute the pinned ggen binary, verify its receipt, and prove byte-identical second manufacture.",
     "committedReceiptPolicy": "Do not commit a success receipt that predates its own source commit.",
     "archive": "archive/pre-v26.8.24"
   },
@@ -48,6 +53,7 @@
   "nonClaims": [
     "Repository conformance does not prove Fortune-500 semantic closure or economic dominance.",
     "The Fortune-500 FIBO example is a synthetic sensitivity model, not an empirical company forecast.",
+    "Successful ggen self-application to the mdBook control surface does not prove complete APS self-hosting.",
     "No file in this repository grants production actuation authority."
   ]
 }
