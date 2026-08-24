@@ -39,12 +39,14 @@ EXPECTED_CHAPTERS = [
     "14_conformance_metrology_and_replay.md",
     "15_falsifiers_and_research_agenda.md",
     "16_autonomic_manufacturing_manifesto.md",
+    "17_rices_theorem_and_epistemic_boundaries.md",
+    "18_reference_manufacturing_stack.md",
+    "19_industrial_lineage_from_jig_to_autonomic_factory.md",
 ]
 STALE_PATH_MARKERS = (
     "v26_7_", "V26_7_", "fortune5-safe", ".aps-enterprise-bootstrap",
     "work_order.schema", "ggen-v26.7.62", "ggen-enterprise-architecture-v26.7.31"
 )
-# Split historical literals so the verifier does not self-match its own blacklist.
 STALE_CONTENT_MARKERS = (
     "Current candidate: " + "v26." + "7",
     "APS " + "v26." + "7.30",
@@ -77,6 +79,12 @@ def load_json(path: Path, failures: list[str]):
     except Exception as exc:
         failures.append(f"invalid JSON {rel(path)}: {exc}")
         return None
+
+
+def require_phrases(text: str, phrases: list[str], scope: str, failures: list[str]) -> None:
+    for phrase in phrases:
+        if phrase not in text:
+            failures.append(f"{scope} missing required doctrine: {phrase}")
 
 
 def verify_repository() -> tuple[list[str], dict]:
@@ -120,32 +128,37 @@ def verify_repository() -> tuple[list[str], dict]:
         failures.append(f"jig maturity must be exactly five levels L1-L5; got {levels}")
     if re.search(r"^### (?:L0\b|Level 0\b)", jig, flags=re.MULTILINE):
         failures.append("jig maturity defines forbidden sixth baseline L0")
-    dimensions = [
+    for dimension in [
         "Product knowledge", "Work positioning", "Operation guidance", "Process sequence",
         "Error prevention", "Measurement & qualification", "Adaptation & learning"
-    ]
-    for dimension in dimensions:
+    ]:
         if f"| {dimension} |" not in jig:
             failures.append(f"jig matrix missing dimension: {dimension}")
 
     constitution = (version_dir / "13_aps_constitution.md").read_text()
-    for phrase in [
+    require_phrases(constitution, [
         "Everything is sunk", "Preserve truth, not implementations", "Zero continuation privilege",
         "Zero uninformed elimination", "Contract before implementation", "No ambient DO authority",
         "Zero unreceipted actuation", "No prose outranks evidence", "factory itself must remain reconstitutable"
-    ]:
-        if phrase not in constitution:
-            failures.append(f"constitution missing invariant: {phrase}")
+    ], "constitution", failures)
 
     ggen = (version_dir / "05_contract_first_ggen_first.md").read_text()
-    for phrase in [
-        "Known pattern? Compose it.",
-        "Known tool? Generate its invocation.",
-        "Novel mechanism? Discover it once, then teach the factory.",
-        "Application =", "Library ="
-    ]:
-        if phrase not in ggen:
-            failures.append(f"ggen-first chapter missing doctrine: {phrase}")
+    require_phrases(ggen, [
+        "Known pattern? Compose it.", "Known tool? Generate its invocation.",
+        "Novel mechanism? Discover it once, then teach the factory.", "Application =", "Library ="
+    ], "ggen-first chapter", failures)
+
+    rice = (version_dir / "17_rices_theorem_and_epistemic_boundaries.md").read_text()
+    require_phrases(rice, ["Rice's Theorem", "arbitrary programs", "bounded standing", "model confidence is not standing"], "Rice chapter", failures)
+
+    stack = (version_dir / "18_reference_manufacturing_stack.md").read_text()
+    require_phrases(stack, [
+        "ggen-marketplace", "ggen-legacy", "ggen-create", "ggen-spec-kit", "clap-noun-verb",
+        "ggen-mcp", "ash_r2rml", "XaaS", "AutoFDE Lab", "GymAct", "ex4pm", "Reference implementations are themselves sunk"
+    ], "reference stack", failures)
+
+    industrial = (version_dir / "19_industrial_lineage_from_jig_to_autonomic_factory.md").read_text()
+    require_phrases(industrial, ["industrial memory", "Jidoka", "poka-yoke", "Automated craftsmanship versus manufacture"], "industrial lineage", failures)
 
     core_ontology = (ROOT / "ontology/aps-core.ttl").read_text()
     for marker in [

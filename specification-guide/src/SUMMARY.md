@@ -17,3 +17,6 @@
 - [Conformance, Metrology, and Replay](v26_8_24/14_conformance_metrology_and_replay.md)
 - [Falsifiers and Research Agenda](v26_8_24/15_falsifiers_and_research_agenda.md)
 - [Autonomic Manufacturing Manifesto](v26_8_24/16_autonomic_manufacturing_manifesto.md)
+- [Rice's Theorem and Epistemic Boundaries](v26_8_24/17_rices_theorem_and_epistemic_boundaries.md)
+- [Reference Manufacturing Stack](v26_8_24/18_reference_manufacturing_stack.md)
+- [Industrial Lineage: From Jig to Autonomic Factory](v26_8_24/19_industrial_lineage_from_jig_to_autonomic_factory.md)
