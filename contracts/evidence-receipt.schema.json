@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/chatman/aps/v26.8.24/evidence-receipt.schema.json",
+  "title": "APS Evidence Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["receiptId", "sourceCoordinate", "inputDigest", "contractRef", "executorRef", "observation", "resultDigest", "standing", "verifier"],
+  "properties": {
+    "receiptId": {"type":"string"},
+    "sourceCoordinate": {"type":"string"},
+    "inputDigest": {"type":"string","pattern":"^[a-fA-F0-9]{64}$"},
+    "contractRef": {"type":"string"},
+    "executorRef": {"type":"string"},
+    "authorityRef": {"type":"string"},
+    "observation": {"type":"object"},
+    "resultDigest": {"type":"string","pattern":"^[a-fA-F0-9]{64}$"},
+    "standing": {"$ref":"standing.schema.json"},
+    "verifier": {"type":"object","required":["identity","coordinate"],"properties":{"identity":{"type":"string"},"coordinate":{"type":"string"}}},
+    "processEventRefs": {"type":"array","items":{"type":"string"}}
+  }
+}

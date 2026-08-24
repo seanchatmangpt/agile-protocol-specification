@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/chatman/aps/v26.8.24/reconstitution.schema.json",
+  "title": "APS Reconstitution Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["reconstitutionId", "predecessor", "observations", "admittedKnowledge", "contractRefs", "candidateStrategies", "candidateFalsifiers", "sunsetCriteria"],
+  "properties": {
+    "reconstitutionId": {"type":"string"},
+    "predecessor": {"type":"object","required":["coordinate"],"properties":{"coordinate":{"type":"string"},"standing":{"$ref":"standing.schema.json"}}},
+    "observations": {"type":"array","items":{"type":"string"}},
+    "admittedKnowledge": {"type":"array","items":{"type":"string"}},
+    "contractRefs": {"type":"array","minItems":1,"items":{"type":"string"}},
+    "candidateStrategies": {"type":"array","minItems":1,"items":{"type":"object","required":["strategyId","manufacturingLaw"],"properties":{"strategyId":{"type":"string"},"manufacturingLaw":{"type":"string"},"reversible":{"type":"boolean"}}}},
+    "candidateFalsifiers": {"type":"array","items":{"type":"string"}},
+    "selectedStrategy": {"type":["string","null"]},
+    "sunsetCriteria": {"type":"array","minItems":1,"items":{"type":"string"}}
+  }
+}

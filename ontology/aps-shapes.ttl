@@ -1,0 +1,21 @@
+@prefix aps: <https://w3id.org/chatman/aps#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fibo-be-le-lp: <https://spec.edmcouncil.org/fibo/ontology/BE/LegalEntities/LegalPersons/> .
+
+aps:AdmittedKnowledgeShape a sh:NodeShape ;
+  sh:targetClass aps:AdmittedKnowledge ;
+  sh:message "Admitted knowledge must declare an observable derivation or specialization boundary." ;
+  sh:or (
+    [ sh:property [ sh:path prov:specializationOf ; sh:minCount 1 ] ]
+    [ sh:property [ sh:path prov:wasDerivedFrom ; sh:minCount 1 ] ]
+  ) .
+
+aps:BusinessEntityShape a sh:NodeShape ;
+  sh:targetClass fibo-be-le-lp:BusinessEntity ;
+  sh:property [
+    sh:path dcterms:title ;
+    sh:minCount 1 ;
+    sh:message "Synthetic FIBO business entities must have an explicit human-readable title."
+  ] .

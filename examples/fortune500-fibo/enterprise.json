@@ -1,0 +1,36 @@
+{
+  "schema": "aps.synthetic-enterprise.v26.8.24",
+  "evidenceClass": "SYNTHETIC_SENSITIVITY_MODEL_NOT_FORECAST",
+  "name": "Synthetic FIBO Fortune-500 Enterprise",
+  "semanticProfile": "ontology/fortune500-fibo-profile.ttl",
+  "assumptions": {
+    "enterpriseCapabilities": 6000,
+    "projectionFamiliesPerCapability": 20,
+    "environmentVariants": 12,
+    "architectureCandidates": 16,
+    "averageGeneratedLinesPerProjectionArtifact": 140,
+    "humanLifecycleHoursPerProjectionArtifact": {
+      "requirementsAndArchitecture": 2.0,
+      "implementation": 5.0,
+      "reviewAndVerification": 4.0,
+      "securityAndCompliance": 2.0,
+      "deploymentAndOperations": 2.0,
+      "documentationAndAudit": 1.5,
+      "coordinationAndQueueHandling": 1.5
+    },
+    "manufacturingKnowledgeObjects": {
+      "publicOntologyProfiles": 40,
+      "enterpriseContracts": 6000,
+      "manufacturingPatterns": 350,
+      "authorityPolicies": 120,
+      "verifierPolicies": 180
+    },
+    "boardValidationMode": "validate source classes, contract law, manufacturing patterns, authority policy, and verifier law; do not manually inspect every manufactured artifact"
+  },
+  "nonClaims": [
+    "These quantities are not measurements of a real Fortune-500 company.",
+    "Generated lines are not economic value by themselves.",
+    "The model does not prove that every enterprise capability is semantically closed.",
+    "The model does not grant deployment authority."
+  ]
+}

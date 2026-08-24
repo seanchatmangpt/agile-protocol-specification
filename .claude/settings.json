@@ -1,6 +1,5 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-
   "permissions": {
     "allow": [
       "Read",
@@ -8,67 +7,29 @@
       "Grep",
       "Skill",
       "Task",
-      "Bash(mdbook *)",
-      "Bash(npm run *)",
-      "Bash(git status)",
-      "Bash(git log *)",
+      "Bash(python3 -m pip install --disable-pip-version-check -r tools/requirements-ci.txt)",
+      "Bash(python3 tools/verify.py *)",
+      "Bash(python3 tools/simulate_fortune500.py *)",
+      "Bash(python3 -m unittest *)",
+      "Bash(mdbook build *)",
+      "Bash(git status *)",
       "Bash(git diff *)",
-      "Bash(git add *)",
-      "Bash(git commit *)",
-      "Edit(specification-guide/**/*.md)",
-      "Edit(*.md)",
-      "Write(specification-guide/**/*.md)",
-      "Write(.claude/**/*)"
+      "Bash(git log *)"
     ],
     "deny": [
       "Bash(rm -rf *)",
-      "Bash(curl *)",
-      "Bash(wget *)",
       "Read(.env*)",
       "Edit(.env*)",
       "Write(.env*)"
     ]
   },
-
   "env": {
-    "PROJECT_NAME": "agile-protocol-specification",
-    "BUILD_DIR": "specification-guide/book",
-    "SRC_DIR": "specification-guide/src"
+    "APS_VERSION": "26.8.24",
+    "APS_MANIFEST": "MANIFEST.json",
+    "APS_BOOK": "specification-guide"
   },
-
   "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo '=== APS Session Started ===' && git status --short 2>/dev/null || true"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "FILE=$(echo $CLAUDE_FILE_PATHS | head -1); [[ \"$FILE\" == *.md ]] && echo 'Markdown file updated: '$FILE || true"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "git status --short 2>/dev/null && echo '=== Session Complete ===' || true"
-          }
-        ]
-      }
-    ]
+    "SessionStart": [{"matcher":"","hooks":[{"type":"command","command":"echo 'APS v26.8.24: manifest first, archive is evidence only' && git status --short 2>/dev/null || true"}]}],
+    "Stop": [{"matcher":"","hooks":[{"type":"command","command":"python3 tools/verify.py --no-receipt 2>/dev/null || true"}]}]
   }
 }

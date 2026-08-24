@@ -1,0 +1,299 @@
+#!/usr/bin/env python3
+"""Whole-repository verifier for APS v26.8.24.
+
+This verifier qualifies repository coherence. It does not prove the long-horizon
+enterprise-manufacturing hypothesis.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+STANDING = {"ALIVE", "PARTIAL_ALIVE", "BLOCKED", "BUILD_BROKEN", "UNKNOWN", "UNSUPPORTED", "REFUSED"}
+EXPECTED_TOP = {
+    ".aps-syntax.md", ".claude", ".github", ".gitignore", "AGENTS.md", "CLAUDE.md",
+    "CONTRIBUTING.md", "LICENSE", "MANIFEST.json", "Makefile", "README.md", "SECURITY.md",
+    "archive", "contracts", "examples", "ontology", "receipts", "simulation",
+    "specification-guide", "tests", "tools"
+}
+EXPECTED_CHAPTERS = [
+    "00_source_admission_and_paradigm_reset.md", "01_chatmans_law.md",
+    "02_fuller_ephemeralization_and_reconstitution.md", "03_jig_maturity.md",
+    "04_dfcm_and_adversarial_manufacturing_search.md", "05_contract_first_ggen_first.md",
+    "06_executable_enterprise_architecture.md", "07_universal_execution_and_process_intelligence.md",
+    "08_software_manufacturing_capex.md", "09_governance_compression.md",
+    "10_fortune500_economics.md", "11_adversarial_adoption_and_evolutionary_pressure.md",
+    "12_board_and_organizational_operating_model.md", "13_aps_constitution.md",
+    "14_conformance_metrology_and_replay.md", "15_falsifiers_and_research_agenda.md",
+    "16_autonomic_manufacturing_manifesto.md", "17_rices_theorem_and_epistemic_boundaries.md",
+    "18_reference_manufacturing_stack.md", "19_industrial_lineage_from_jig_to_autonomic_factory.md",
+]
+STALE_PATH_MARKERS = (
+    "v26_7_", "V26_7_", "fortune5-safe", ".aps-enterprise-bootstrap",
+    "work_order.schema", "ggen-v26.7.62", "ggen-enterprise-architecture-v26.7.31"
+)
+STALE_CONTENT_MARKERS = (
+    "Current candidate: " + "v26." + "7", "APS " + "v26." + "7.30",
+    "APS " + "v26." + "7.31",
+    "comprehensive framework and documentation standard " + "designed for agile software development",
+)
+
+
+def rel(path: Path) -> str:
+    return path.relative_to(ROOT).as_posix()
+
+
+def active_files():
+    for path in ROOT.rglob("*"):
+        if not path.is_file():
+            continue
+        parts = path.relative_to(ROOT).parts
+        if ".git" in parts or (parts and parts[0] == "archive"):
+            continue
+        yield path
+
+
+def text_file(path: Path) -> bool:
+    return path.suffix.lower() in {".md", ".json", ".py", ".yml", ".yaml", ".toml", ".ttl", ".css", ".txt"} or path.name == "Makefile"
+
+
+def load_json(path: Path, failures: list[str]):
+    try:
+        return json.loads(path.read_text())
+    except Exception as exc:
+        failures.append(f"invalid JSON {rel(path)}: {exc}")
+        return None
+
+
+def require_phrases(text: str, phrases: list[str], scope: str, failures: list[str]) -> None:
+    for phrase in phrases:
+        if phrase not in text:
+            failures.append(f"{scope} missing required doctrine: {phrase}")
+
+
+def validate_machine_readable(failures: list[str]) -> None:
+    try:
+        from jsonschema import Draft202012Validator
+        from rdflib import Graph
+        from referencing import Registry, Resource
+        from pyshacl import validate as shacl_validate
+    except ImportError as exc:
+        failures.append(f"semantic qualification dependency unavailable: {exc}")
+        return
+
+    graphs = {}
+    for path in sorted((ROOT / "ontology").glob("*.ttl")):
+        try:
+            graph = Graph()
+            graph.parse(path, format="turtle")
+            graphs[path.name] = graph
+        except Exception as exc:
+            failures.append(f"invalid Turtle {rel(path)}: {exc}")
+
+    if "fortune500-fibo-profile.ttl" in graphs and "aps-shapes.ttl" in graphs:
+        try:
+            conforms, _, report = shacl_validate(
+                data_graph=graphs["fortune500-fibo-profile.ttl"],
+                shacl_graph=graphs["aps-shapes.ttl"],
+                inference="rdfs",
+                abort_on_first=False,
+                allow_infos=False,
+                allow_warnings=False,
+                meta_shacl=True,
+                advanced=False,
+                js=False,
+            )
+            if not conforms:
+                failures.append(f"SHACL validation failed for synthetic FIBO profile: {report}")
+        except Exception as exc:
+            failures.append(f"SHACL execution failed: {exc}")
+
+    schemas = {}
+    resources = []
+    for path in sorted((ROOT / "contracts").glob("*.schema.json")):
+        schema = load_json(path, failures)
+        if not schema:
+            continue
+        try:
+            Draft202012Validator.check_schema(schema)
+            schemas[path.name] = schema
+            resources.append((schema["$id"], Resource.from_contents(schema)))
+        except Exception as exc:
+            failures.append(f"invalid JSON Schema {rel(path)}: {exc}")
+    registry = Registry().with_resources(resources)
+
+    def validate_instance(instance, schema_name: str, scope: str) -> None:
+        schema = schemas.get(schema_name)
+        if not schema:
+            failures.append(f"cannot validate {scope}: missing schema {schema_name}")
+            return
+        try:
+            Draft202012Validator(schema, registry=registry).validate(instance)
+        except Exception as exc:
+            failures.append(f"schema validation failed for {scope}: {exc}")
+
+    contract = load_json(ROOT / "examples/fortune500-fibo/knowledge-contract.json", failures)
+    reconstitution = load_json(ROOT / "examples/fortune500-fibo/reconstitution.json", failures)
+    events = load_json(ROOT / "examples/fortune500-fibo/process-events.json", failures)
+    if contract:
+        validate_instance(contract, "knowledge-contract.schema.json", "synthetic knowledge contract")
+    if reconstitution:
+        validate_instance(reconstitution, "reconstitution.schema.json", "synthetic reconstitution plan")
+    if isinstance(events, list):
+        for index, event in enumerate(events):
+            validate_instance(event, "process-event.schema.json", f"process event {index}")
+
+
+def verify_repository() -> tuple[list[str], dict]:
+    failures: list[str] = []
+
+    actual_top = {p.name for p in ROOT.iterdir() if p.name != ".git"}
+    missing = sorted(EXPECTED_TOP - actual_top)
+    extra = sorted(actual_top - EXPECTED_TOP)
+    if missing:
+        failures.append(f"missing top-level surfaces: {missing}")
+    if extra:
+        failures.append(f"unadmitted top-level surfaces: {extra}")
+
+    for path in active_files():
+        rp = rel(path)
+        if any(marker in rp for marker in STALE_PATH_MARKERS):
+            failures.append(f"stale active path: {rp}")
+        if text_file(path):
+            try:
+                text = path.read_text()
+            except UnicodeDecodeError:
+                failures.append(f"non-UTF8 active text surface: {rp}")
+                continue
+            for marker in STALE_CONTENT_MARKERS:
+                if marker in text:
+                    failures.append(f"stale active content marker {marker!r} in {rp}")
+
+    version_dir = ROOT / "specification-guide/src/v26_8_24"
+    actual_chapters = sorted(p.name for p in version_dir.glob("*.md")) if version_dir.exists() else []
+    if actual_chapters != EXPECTED_CHAPTERS:
+        failures.append(f"chapter set mismatch: expected {EXPECTED_CHAPTERS}, got {actual_chapters}")
+    summary = (ROOT / "specification-guide/src/SUMMARY.md").read_text()
+    for chapter in EXPECTED_CHAPTERS:
+        if f"v26_8_24/{chapter}" not in summary:
+            failures.append(f"SUMMARY missing {chapter}")
+
+    jig = (version_dir / "03_jig_maturity.md").read_text()
+    levels = re.findall(r"^### L([1-5]) — ", jig, flags=re.MULTILINE)
+    if levels != ["1", "2", "3", "4", "5"]:
+        failures.append(f"jig maturity must be exactly five levels L1-L5; got {levels}")
+    if re.search(r"^### (?:L0\b|Level 0\b)", jig, flags=re.MULTILINE):
+        failures.append("jig maturity defines forbidden sixth baseline L0")
+    for dimension in ["Product knowledge", "Work positioning", "Operation guidance", "Process sequence", "Error prevention", "Measurement & qualification", "Adaptation & learning"]:
+        if f"| {dimension} |" not in jig:
+            failures.append(f"jig matrix missing dimension: {dimension}")
+
+    require_phrases((version_dir / "13_aps_constitution.md").read_text(), [
+        "Everything is sunk", "Preserve truth, not implementations", "Zero continuation privilege",
+        "Zero uninformed elimination", "Contract before implementation", "No ambient DO authority",
+        "Zero unreceipted actuation", "No prose outranks evidence", "factory itself must remain reconstitutable"
+    ], "constitution", failures)
+    require_phrases((version_dir / "05_contract_first_ggen_first.md").read_text(), [
+        "Known pattern? Compose it.", "Known tool? Generate its invocation.",
+        "Novel mechanism? Discover it once, then teach the factory.", "Application =", "Library ="
+    ], "ggen-first chapter", failures)
+    require_phrases((version_dir / "17_rices_theorem_and_epistemic_boundaries.md").read_text(), [
+        "Rice's Theorem", "arbitrary programs", "bounded standing", "model confidence is not standing"
+    ], "Rice chapter", failures)
+    require_phrases((version_dir / "18_reference_manufacturing_stack.md").read_text(), [
+        "ggen-marketplace", "ggen-legacy", "ggen-create", "ggen-spec-kit", "clap-noun-verb", "ggen-mcp",
+        "ash_r2rml", "XaaS", "AutoFDE Lab", "GymAct", "ex4pm", "Reference implementations are themselves sunk"
+    ], "reference stack", failures)
+    require_phrases((version_dir / "19_industrial_lineage_from_jig_to_autonomic_factory.md").read_text(), [
+        "industrial memory", "Jidoka", "poka-yoke", "Automated craftsmanship versus manufacture"
+    ], "industrial lineage", failures)
+
+    core_ontology = (ROOT / "ontology/aps-core.ttl").read_text()
+    for marker in ["http://www.w3.org/ns/prov#", "http://www.w3.org/ns/odrl/2/", "http://www.w3.org/ns/shacl#", "http://www.w3.org/ns/dqv#"]:
+        if marker not in core_ontology:
+            failures.append(f"core ontology missing public vocabulary {marker}")
+    fibo = (ROOT / "ontology/fortune500-fibo-profile.ttl").read_text()
+    if "https://spec.edmcouncil.org/fibo/ontology/master/latest/BE/LegalEntities/LegalPersons/" not in fibo:
+        failures.append("FIBO profile missing admitted LegalPersons import")
+
+    enterprise = load_json(ROOT / "examples/fortune500-fibo/enterprise.json", failures)
+    contract = load_json(ROOT / "examples/fortune500-fibo/knowledge-contract.json", failures)
+    reconstitution = load_json(ROOT / "examples/fortune500-fibo/reconstitution.json", failures)
+    events = load_json(ROOT / "examples/fortune500-fibo/process-events.json", failures)
+    manifest = load_json(ROOT / "MANIFEST.json", failures)
+    if enterprise and enterprise.get("evidenceClass") != "SYNTHETIC_SENSITIVITY_MODEL_NOT_FORECAST":
+        failures.append("Fortune-500 example must remain explicitly synthetic")
+    if contract and contract.get("standingRule") not in STANDING:
+        failures.append("example contract uses invalid standing")
+    if reconstitution and len(reconstitution.get("candidateStrategies", [])) < 3:
+        failures.append("reconstitution example lacks DfCM strategy breadth")
+    if events:
+        for i, event in enumerate(events):
+            for key in ("eventId", "activity", "time", "objects", "authorityRef", "receiptRef"):
+                if key not in event:
+                    failures.append(f"process event {i} missing {key}")
+    if manifest:
+        if manifest.get("version") != "26.8.24":
+            failures.append("MANIFEST version mismatch")
+        if manifest.get("predecessor", {}).get("commit") != "ab04337b2db63c66fa23c217bf76622fc9c73b6d":
+            failures.append("MANIFEST predecessor coordinate mismatch")
+
+    validate_machine_readable(failures)
+
+    if (ROOT / "specification-guide/book").exists() or (ROOT / "specification-guide/dist").exists():
+        failures.append("generated book/dist outputs must not be committed as active source")
+
+    authority_paths = [
+        ROOT / "MANIFEST.json", ROOT / ".aps-syntax.md",
+        *sorted((ROOT / "ontology").glob("*.ttl")),
+        *sorted((ROOT / "contracts").glob("*.json")),
+        *[version_dir / name for name in EXPECTED_CHAPTERS],
+    ]
+    digest = hashlib.sha256()
+    checked = []
+    for path in authority_paths:
+        if not path.exists():
+            continue
+        data = path.read_bytes()
+        digest.update(rel(path).encode() + b"\0" + data + b"\0")
+        checked.append({"path": rel(path), "sha256": hashlib.sha256(data).hexdigest()})
+
+    receipt = {
+        "schema": "aps.repository-verification.v26.8.24",
+        "standing": "ALIVE" if not failures else "REFUSED",
+        "scope": "repository-coherence-not-crown-hypothesis",
+        "authoritySetSha256": digest.hexdigest(),
+        "checkedAuthorityFiles": checked,
+        "failures": failures,
+        "nonClaims": [
+            "ALIVE here means the repository satisfies its declared structural constitution and executable semantic/schema qualification.",
+            "It does not prove Fortune-500 semantic closure, economic dominance, or safe universal actuation."
+        ]
+    }
+    return failures, receipt
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--receipt", type=Path)
+    parser.add_argument("--no-receipt", action="store_true")
+    args = parser.parse_args()
+    failures, receipt = verify_repository()
+    if args.receipt and not args.no_receipt:
+        args.receipt.parent.mkdir(parents=True, exist_ok=True)
+        args.receipt.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    print(json.dumps(receipt, indent=2, sort_keys=True))
+    if failures:
+        for failure in failures:
+            print(f"REFUSED: {failure}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

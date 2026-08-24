@@ -1,0 +1,28 @@
+[
+  {
+    "eventId": "evt-001",
+    "activity": "admit-enterprise-contract",
+    "time": "2026-08-24T20:00:00Z",
+    "objects": [
+      {"objectId":"aps:synthetic-f500:business-entity-capability","objectType":"Contract"},
+      {"objectId":"https://w3id.org/chatman/aps/example/fortune500#SyntheticEnterprise","objectType":"BusinessEntity"}
+    ],
+    "attributes": {"plane":"SELECT","synthetic":true},
+    "authorityRef": "aps:policy:contract-admission",
+    "receiptRef": "receipt-001",
+    "provenanceRefs": ["ontology/fortune500-fibo-profile.ttl"]
+  },
+  {
+    "eventId": "evt-002",
+    "activity": "manufacture-candidate-projections",
+    "time": "2026-08-24T20:01:00Z",
+    "objects": [
+      {"objectId":"candidate-set-001","objectType":"ManufacturingCandidateSet"},
+      {"objectId":"aps:synthetic-f500:business-entity-capability","objectType":"Contract"}
+    ],
+    "attributes": {"plane":"CONSTRUCT","synthetic":true},
+    "authorityRef": "aps:policy:construct",
+    "receiptRef": "receipt-002",
+    "provenanceRefs": ["fortune500-fibo/reconstitution.json"]
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "contractId": "aps:synthetic-f500:business-entity-capability",
+  "semanticSubjects": [
+    "https://spec.edmcouncil.org/fibo/ontology/BE/LegalEntities/LegalPersons/BusinessEntity"
+  ],
+  "preconditions": [
+    "enterprise facts have passed semantic admission",
+    "all consequential bindings identify an authority policy",
+    "all selected projections identify an independent qualification route"
+  ],
+  "postconditions": [
+    "manufactured projections remain traceable to the admitted semantic subject",
+    "process evidence identifies object, activity, authority, and receipt"
+  ],
+  "invariants": [
+    "no generated artifact becomes independent semantic authority",
+    "SELECT, CONSTRUCT, and DO remain distinct",
+    "UNKNOWN is never promoted to ALIVE"
+  ],
+  "refusals": [
+    "semantic ambiguity without an admitted profile",
+    "consequential action without authorityRef",
+    "standing claim without verifier evidence"
+  ],
+  "authority": {"required": true, "policyRefs": ["aps:policy:consequential-do"]},
+  "evidence": {"receiptRequired": true, "independentVerification": true, "processEventRequired": true},
+  "resourceBounds": {"candidateArchitectures": 16, "environmentVariants": 12},
+  "compatibility": ["FIBO Legal Persons", "PROV-O", "ODRL", "OCEL-inspired event envelope"],
+  "standingRule": "PARTIAL_ALIVE"
+}
