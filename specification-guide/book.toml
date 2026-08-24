@@ -16,5 +16,3 @@ additional-css = ["theme/aps.css"]
 
 [output.html.print]
 enable = true
-
-[output.pdf]
