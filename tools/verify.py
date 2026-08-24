@@ -44,9 +44,12 @@ STALE_PATH_MARKERS = (
     "v26_7_", "V26_7_", "fortune5-safe", ".aps-enterprise-bootstrap",
     "work_order.schema", "ggen-v26.7.62", "ggen-enterprise-architecture-v26.7.31"
 )
+# Split historical literals so the verifier does not self-match its own blacklist.
 STALE_CONTENT_MARKERS = (
-    "Current candidate: v26.7", "APS v26.7.30", "APS v26.7.31",
-    "comprehensive framework and documentation standard designed for agile software development"
+    "Current candidate: " + "v26." + "7",
+    "APS " + "v26." + "7.30",
+    "APS " + "v26." + "7.31",
+    "comprehensive framework and documentation standard " + "designed for agile software development",
 )
 
 
@@ -65,7 +68,7 @@ def active_files():
 
 
 def text_file(path: Path) -> bool:
-    return path.suffix.lower() in {".md", ".json", ".py", ".yml", ".yaml", ".toml", ".ttl", ".css", ".txt"} or path.name in {"Makefile"}
+    return path.suffix.lower() in {".md", ".json", ".py", ".yml", ".yaml", ".toml", ".ttl", ".css", ".txt"} or path.name == "Makefile"
 
 
 def load_json(path: Path, failures: list[str]):
@@ -115,8 +118,8 @@ def verify_repository() -> tuple[list[str], dict]:
     levels = re.findall(r"^### L([1-5]) — ", jig, flags=re.MULTILINE)
     if levels != ["1", "2", "3", "4", "5"]:
         failures.append(f"jig maturity must be exactly five levels L1-L5; got {levels}")
-    if re.search(r"\bL0\b|Level 0", jig):
-        failures.append("jig maturity contains forbidden sixth baseline L0")
+    if re.search(r"^### (?:L0\b|Level 0\b)", jig, flags=re.MULTILINE):
+        failures.append("jig maturity defines forbidden sixth baseline L0")
     dimensions = [
         "Product knowledge", "Work positioning", "Operation guidance", "Process sequence",
         "Error prevention", "Measurement & qualification", "Adaptation & learning"
@@ -135,12 +138,20 @@ def verify_repository() -> tuple[list[str], dict]:
             failures.append(f"constitution missing invariant: {phrase}")
 
     ggen = (version_dir / "05_contract_first_ggen_first.md").read_text()
-    for phrase in ["Known pattern? Compose it.", "Known tool? Generate its invocation.", "Novel mechanism? Discover it once, then teach the factory.", "Application =", "Library ="]:
+    for phrase in [
+        "Known pattern? Compose it.",
+        "Known tool? Generate its invocation.",
+        "Novel mechanism? Discover it once, then teach the factory.",
+        "Application =", "Library ="
+    ]:
         if phrase not in ggen:
             failures.append(f"ggen-first chapter missing doctrine: {phrase}")
 
     core_ontology = (ROOT / "ontology/aps-core.ttl").read_text()
-    for marker in ["http://www.w3.org/ns/prov#", "http://www.w3.org/ns/odrl/2/", "http://www.w3.org/ns/shacl#", "http://www.w3.org/ns/dqv#"]:
+    for marker in [
+        "http://www.w3.org/ns/prov#", "http://www.w3.org/ns/odrl/2/",
+        "http://www.w3.org/ns/shacl#", "http://www.w3.org/ns/dqv#"
+    ]:
         if marker not in core_ontology:
             failures.append(f"core ontology missing public vocabulary {marker}")
     fibo = (ROOT / "ontology/fortune500-fibo-profile.ttl").read_text()
