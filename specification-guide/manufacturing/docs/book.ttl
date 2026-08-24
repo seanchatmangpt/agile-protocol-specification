@@ -1,0 +1,34 @@
+@prefix mdp: <https://seanchatmangpt.github.io/ggen-marketplace/mdbook-pattern-language#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+<https://github.com/seanchatmangpt/agile-protocol-specification> a mdp:Book, prov:Entity ;
+    dcterms:title "Agile Protocol Specification v26.8.24" ;
+    dcterms:description "A constitution for public-semantic, evidence-bound knowledge-work reconstitution and autonomic manufacturing." ;
+    dcterms:creator "Sean Chatman" ;
+    dcterms:language "en" ;
+    mdp:srcDir "src" ;
+    mdp:buildDir "book" ;
+    mdp:repositoryUrl "https://github.com/seanchatmangpt/agile-protocol-specification" ;
+    prov:wasDerivedFrom mdp:PatternLanguage .
+
+<urn:aps:v26.8.24:nav:001> a mdp:NavigationEntry ; mdp:position 1 ; mdp:kind "chapter" ; dcterms:title "Source Admission and Paradigm Reset" ; mdp:path "v26_8_24/00_source_admission_and_paradigm_reset.md" .
+<urn:aps:v26.8.24:nav:002> a mdp:NavigationEntry ; mdp:position 2 ; mdp:kind "chapter" ; dcterms:title "Chatman's Law" ; mdp:path "v26_8_24/01_chatmans_law.md" .
+<urn:aps:v26.8.24:nav:003> a mdp:NavigationEntry ; mdp:position 3 ; mdp:kind "chapter" ; dcterms:title "Fuller, Ephemeralization, and Reconstitution" ; mdp:path "v26_8_24/02_fuller_ephemeralization_and_reconstitution.md" .
+<urn:aps:v26.8.24:nav:004> a mdp:NavigationEntry ; mdp:position 4 ; mdp:kind "chapter" ; dcterms:title "Five-Level × Seven-Dimension Jig Maturity" ; mdp:path "v26_8_24/03_jig_maturity.md" .
+<urn:aps:v26.8.24:nav:005> a mdp:NavigationEntry ; mdp:position 5 ; mdp:kind "chapter" ; dcterms:title "DfCM and Adversarial Manufacturing Search" ; mdp:path "v26_8_24/04_dfcm_and_adversarial_manufacturing_search.md" .
+<urn:aps:v26.8.24:nav:006> a mdp:NavigationEntry ; mdp:position 6 ; mdp:kind "chapter" ; dcterms:title "Contract First, ggen First" ; mdp:path "v26_8_24/05_contract_first_ggen_first.md" .
+<urn:aps:v26.8.24:nav:007> a mdp:NavigationEntry ; mdp:position 7 ; mdp:kind "chapter" ; dcterms:title "Executable Enterprise Architecture" ; mdp:path "v26_8_24/06_executable_enterprise_architecture.md" .
+<urn:aps:v26.8.24:nav:008> a mdp:NavigationEntry ; mdp:position 8 ; mdp:kind "chapter" ; dcterms:title "Universal Execution and Full Process Intelligence" ; mdp:path "v26_8_24/07_universal_execution_and_process_intelligence.md" .
+<urn:aps:v26.8.24:nav:009> a mdp:NavigationEntry ; mdp:position 9 ; mdp:kind "chapter" ; dcterms:title "Software Manufacturing as CapEx" ; mdp:path "v26_8_24/08_software_manufacturing_capex.md" .
+<urn:aps:v26.8.24:nav:010> a mdp:NavigationEntry ; mdp:position 10 ; mdp:kind "chapter" ; dcterms:title "Governance Compression and Board-Level Validation" ; mdp:path "v26_8_24/09_governance_compression.md" .
+<urn:aps:v26.8.24:nav:011> a mdp:NavigationEntry ; mdp:position 11 ; mdp:kind "chapter" ; dcterms:title "Fortune-500 Economics and Human Lifecycle Cost" ; mdp:path "v26_8_24/10_fortune500_economics.md" .
+<urn:aps:v26.8.24:nav:012> a mdp:NavigationEntry ; mdp:position 12 ; mdp:kind "chapter" ; dcterms:title "Adversarial Adoption and Evolutionary Pressure" ; mdp:path "v26_8_24/11_adversarial_adoption_and_evolutionary_pressure.md" .
+<urn:aps:v26.8.24:nav:013> a mdp:NavigationEntry ; mdp:position 13 ; mdp:kind "chapter" ; dcterms:title "Board and Organizational Operating Model" ; mdp:path "v26_8_24/12_board_and_organizational_operating_model.md" .
+<urn:aps:v26.8.24:nav:014> a mdp:NavigationEntry ; mdp:position 14 ; mdp:kind "chapter" ; dcterms:title "APS Constitution: Authority, Standing, and Consequence" ; mdp:path "v26_8_24/13_aps_constitution.md" .
+<urn:aps:v26.8.24:nav:015> a mdp:NavigationEntry ; mdp:position 15 ; mdp:kind "chapter" ; dcterms:title "Conformance, Metrology, and Replay" ; mdp:path "v26_8_24/14_conformance_metrology_and_replay.md" .
+<urn:aps:v26.8.24:nav:016> a mdp:NavigationEntry ; mdp:position 16 ; mdp:kind "chapter" ; dcterms:title "Falsifiers and Research Agenda" ; mdp:path "v26_8_24/15_falsifiers_and_research_agenda.md" .
+<urn:aps:v26.8.24:nav:017> a mdp:NavigationEntry ; mdp:position 17 ; mdp:kind "chapter" ; dcterms:title "Autonomic Manufacturing Manifesto" ; mdp:path "v26_8_24/16_autonomic_manufacturing_manifesto.md" .
+<urn:aps:v26.8.24:nav:018> a mdp:NavigationEntry ; mdp:position 18 ; mdp:kind "chapter" ; dcterms:title "Rice's Theorem and Epistemic Boundaries" ; mdp:path "v26_8_24/17_rices_theorem_and_epistemic_boundaries.md" .
+<urn:aps:v26.8.24:nav:019> a mdp:NavigationEntry ; mdp:position 19 ; mdp:kind "chapter" ; dcterms:title "Reference Manufacturing Stack" ; mdp:path "v26_8_24/18_reference_manufacturing_stack.md" .
+<urn:aps:v26.8.24:nav:020> a mdp:NavigationEntry ; mdp:position 20 ; mdp:kind "chapter" ; dcterms:title "Industrial Lineage: From Jig to Autonomic Factory" ; mdp:path "v26_8_24/19_industrial_lineage_from_jig_to_autonomic_factory.md" .
