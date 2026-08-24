@@ -82,7 +82,7 @@ A mature system must be able to observe and recover the truth embodied in its ow
 - runtime kernels;
 - evidence systems.
 
-The factory that cannot be reconstituted becomes the next legacy monolith.
+A **reconstitutable factory** treats its own implementation as replaceable while preserving enough explicit contract and evidence to manufacture a lawful successor. The factory that cannot be reconstituted becomes the next legacy monolith.
 
 ## Constitutional phrase
 
