@@ -38,6 +38,12 @@ jobs:
           set -euo pipefail
           python3 -m py_compile tools/verify.py tools/simulate_fortune500.py tests/*.py
 
+      - name: Install pinned semantic qualification stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check -r tools/requirements-ci.txt
+
       - name: Qualify whole repository
         shell: bash
         run: |

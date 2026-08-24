@@ -13,6 +13,7 @@
     "navigation": "specification-guide/src/SUMMARY.md",
     "ontology": [
       "ontology/aps-core.ttl",
+      "ontology/aps-shapes.ttl",
       "ontology/jig-maturity.ttl",
       "ontology/fortune500-fibo-profile.ttl"
     ],
@@ -21,6 +22,7 @@
   },
   "executableQualification": {
     "repositoryVerifier": "tools/verify.py",
+    "qualificationDependencies": "tools/requirements-ci.txt",
     "tests": "tests/",
     "syntheticEnterpriseModel": "tools/simulate_fortune500.py",
     "workflow": ".github/workflows/verify-v26.8.24.yml"

@@ -45,7 +45,13 @@ Generated book output belongs outside the repository. Current CI builds to `/tmp
 
 ## Required validation
 
-Run all of:
+Install the pinned qualification stack once per environment:
+
+```bash
+python3 -m pip install --disable-pip-version-check -r tools/requirements-ci.txt
+```
+
+Then run all of:
 
 ```bash
 python3 tools/verify.py --no-receipt
@@ -53,5 +59,7 @@ python3 -m unittest discover -s tests -v
 mdbook build -d /tmp/aps-book specification-guide
 python3 tools/simulate_fortune500.py examples/fortune500-fibo/enterprise.json
 ```
+
+The repository verifier parses every active Turtle graph, validates the SHACL profile, checks every JSON Schema, and validates the synthetic contract/reconstitution/process-event instances.
 
 Before promotion, require exact-head CI for the candidate being promoted.

@@ -22,34 +22,23 @@ EXPECTED_TOP = {
     "specification-guide", "tests", "tools"
 }
 EXPECTED_CHAPTERS = [
-    "00_source_admission_and_paradigm_reset.md",
-    "01_chatmans_law.md",
-    "02_fuller_ephemeralization_and_reconstitution.md",
-    "03_jig_maturity.md",
-    "04_dfcm_and_adversarial_manufacturing_search.md",
-    "05_contract_first_ggen_first.md",
-    "06_executable_enterprise_architecture.md",
-    "07_universal_execution_and_process_intelligence.md",
-    "08_software_manufacturing_capex.md",
-    "09_governance_compression.md",
-    "10_fortune500_economics.md",
-    "11_adversarial_adoption_and_evolutionary_pressure.md",
-    "12_board_and_organizational_operating_model.md",
-    "13_aps_constitution.md",
-    "14_conformance_metrology_and_replay.md",
-    "15_falsifiers_and_research_agenda.md",
-    "16_autonomic_manufacturing_manifesto.md",
-    "17_rices_theorem_and_epistemic_boundaries.md",
-    "18_reference_manufacturing_stack.md",
-    "19_industrial_lineage_from_jig_to_autonomic_factory.md",
+    "00_source_admission_and_paradigm_reset.md", "01_chatmans_law.md",
+    "02_fuller_ephemeralization_and_reconstitution.md", "03_jig_maturity.md",
+    "04_dfcm_and_adversarial_manufacturing_search.md", "05_contract_first_ggen_first.md",
+    "06_executable_enterprise_architecture.md", "07_universal_execution_and_process_intelligence.md",
+    "08_software_manufacturing_capex.md", "09_governance_compression.md",
+    "10_fortune500_economics.md", "11_adversarial_adoption_and_evolutionary_pressure.md",
+    "12_board_and_organizational_operating_model.md", "13_aps_constitution.md",
+    "14_conformance_metrology_and_replay.md", "15_falsifiers_and_research_agenda.md",
+    "16_autonomic_manufacturing_manifesto.md", "17_rices_theorem_and_epistemic_boundaries.md",
+    "18_reference_manufacturing_stack.md", "19_industrial_lineage_from_jig_to_autonomic_factory.md",
 ]
 STALE_PATH_MARKERS = (
     "v26_7_", "V26_7_", "fortune5-safe", ".aps-enterprise-bootstrap",
     "work_order.schema", "ggen-v26.7.62", "ggen-enterprise-architecture-v26.7.31"
 )
 STALE_CONTENT_MARKERS = (
-    "Current candidate: " + "v26." + "7",
-    "APS " + "v26." + "7.30",
+    "Current candidate: " + "v26." + "7", "APS " + "v26." + "7.30",
     "APS " + "v26." + "7.31",
     "comprehensive framework and documentation standard " + "designed for agile software development",
 )
@@ -87,6 +76,79 @@ def require_phrases(text: str, phrases: list[str], scope: str, failures: list[st
             failures.append(f"{scope} missing required doctrine: {phrase}")
 
 
+def validate_machine_readable(failures: list[str]) -> None:
+    try:
+        from jsonschema import Draft202012Validator
+        from rdflib import Graph
+        from referencing import Registry, Resource
+        from pyshacl import validate as shacl_validate
+    except ImportError as exc:
+        failures.append(f"semantic qualification dependency unavailable: {exc}")
+        return
+
+    graphs = {}
+    for path in sorted((ROOT / "ontology").glob("*.ttl")):
+        try:
+            graph = Graph()
+            graph.parse(path, format="turtle")
+            graphs[path.name] = graph
+        except Exception as exc:
+            failures.append(f"invalid Turtle {rel(path)}: {exc}")
+
+    if "fortune500-fibo-profile.ttl" in graphs and "aps-shapes.ttl" in graphs:
+        try:
+            conforms, _, report = shacl_validate(
+                data_graph=graphs["fortune500-fibo-profile.ttl"],
+                shacl_graph=graphs["aps-shapes.ttl"],
+                inference="rdfs",
+                abort_on_first=False,
+                allow_infos=False,
+                allow_warnings=False,
+                meta_shacl=True,
+                advanced=False,
+                js=False,
+            )
+            if not conforms:
+                failures.append(f"SHACL validation failed for synthetic FIBO profile: {report}")
+        except Exception as exc:
+            failures.append(f"SHACL execution failed: {exc}")
+
+    schemas = {}
+    resources = []
+    for path in sorted((ROOT / "contracts").glob("*.schema.json")):
+        schema = load_json(path, failures)
+        if not schema:
+            continue
+        try:
+            Draft202012Validator.check_schema(schema)
+            schemas[path.name] = schema
+            resources.append((schema["$id"], Resource.from_contents(schema)))
+        except Exception as exc:
+            failures.append(f"invalid JSON Schema {rel(path)}: {exc}")
+    registry = Registry().with_resources(resources)
+
+    def validate_instance(instance, schema_name: str, scope: str) -> None:
+        schema = schemas.get(schema_name)
+        if not schema:
+            failures.append(f"cannot validate {scope}: missing schema {schema_name}")
+            return
+        try:
+            Draft202012Validator(schema, registry=registry).validate(instance)
+        except Exception as exc:
+            failures.append(f"schema validation failed for {scope}: {exc}")
+
+    contract = load_json(ROOT / "examples/fortune500-fibo/knowledge-contract.json", failures)
+    reconstitution = load_json(ROOT / "examples/fortune500-fibo/reconstitution.json", failures)
+    events = load_json(ROOT / "examples/fortune500-fibo/process-events.json", failures)
+    if contract:
+        validate_instance(contract, "knowledge-contract.schema.json", "synthetic knowledge contract")
+    if reconstitution:
+        validate_instance(reconstitution, "reconstitution.schema.json", "synthetic reconstitution plan")
+    if isinstance(events, list):
+        for index, event in enumerate(events):
+            validate_instance(event, "process-event.schema.json", f"process event {index}")
+
+
 def verify_repository() -> tuple[list[str], dict]:
     failures: list[str] = []
 
@@ -116,7 +178,6 @@ def verify_repository() -> tuple[list[str], dict]:
     actual_chapters = sorted(p.name for p in version_dir.glob("*.md")) if version_dir.exists() else []
     if actual_chapters != EXPECTED_CHAPTERS:
         failures.append(f"chapter set mismatch: expected {EXPECTED_CHAPTERS}, got {actual_chapters}")
-
     summary = (ROOT / "specification-guide/src/SUMMARY.md").read_text()
     for chapter in EXPECTED_CHAPTERS:
         if f"v26_8_24/{chapter}" not in summary:
@@ -128,53 +189,37 @@ def verify_repository() -> tuple[list[str], dict]:
         failures.append(f"jig maturity must be exactly five levels L1-L5; got {levels}")
     if re.search(r"^### (?:L0\b|Level 0\b)", jig, flags=re.MULTILINE):
         failures.append("jig maturity defines forbidden sixth baseline L0")
-    for dimension in [
-        "Product knowledge", "Work positioning", "Operation guidance", "Process sequence",
-        "Error prevention", "Measurement & qualification", "Adaptation & learning"
-    ]:
+    for dimension in ["Product knowledge", "Work positioning", "Operation guidance", "Process sequence", "Error prevention", "Measurement & qualification", "Adaptation & learning"]:
         if f"| {dimension} |" not in jig:
             failures.append(f"jig matrix missing dimension: {dimension}")
 
-    constitution = (version_dir / "13_aps_constitution.md").read_text()
-    require_phrases(constitution, [
+    require_phrases((version_dir / "13_aps_constitution.md").read_text(), [
         "Everything is sunk", "Preserve truth, not implementations", "Zero continuation privilege",
         "Zero uninformed elimination", "Contract before implementation", "No ambient DO authority",
         "Zero unreceipted actuation", "No prose outranks evidence", "factory itself must remain reconstitutable"
     ], "constitution", failures)
-
-    ggen = (version_dir / "05_contract_first_ggen_first.md").read_text()
-    require_phrases(ggen, [
+    require_phrases((version_dir / "05_contract_first_ggen_first.md").read_text(), [
         "Known pattern? Compose it.", "Known tool? Generate its invocation.",
         "Novel mechanism? Discover it once, then teach the factory.", "Application =", "Library ="
     ], "ggen-first chapter", failures)
-
-    rice = (version_dir / "17_rices_theorem_and_epistemic_boundaries.md").read_text()
-    require_phrases(rice, ["Rice's Theorem", "arbitrary programs", "bounded standing", "model confidence is not standing"], "Rice chapter", failures)
-
-    stack = (version_dir / "18_reference_manufacturing_stack.md").read_text()
-    require_phrases(stack, [
-        "ggen-marketplace", "ggen-legacy", "ggen-create", "ggen-spec-kit", "clap-noun-verb",
-        "ggen-mcp", "ash_r2rml", "XaaS", "AutoFDE Lab", "GymAct", "ex4pm", "Reference implementations are themselves sunk"
+    require_phrases((version_dir / "17_rices_theorem_and_epistemic_boundaries.md").read_text(), [
+        "Rice's Theorem", "arbitrary programs", "bounded standing", "model confidence is not standing"
+    ], "Rice chapter", failures)
+    require_phrases((version_dir / "18_reference_manufacturing_stack.md").read_text(), [
+        "ggen-marketplace", "ggen-legacy", "ggen-create", "ggen-spec-kit", "clap-noun-verb", "ggen-mcp",
+        "ash_r2rml", "XaaS", "AutoFDE Lab", "GymAct", "ex4pm", "Reference implementations are themselves sunk"
     ], "reference stack", failures)
-
-    industrial = (version_dir / "19_industrial_lineage_from_jig_to_autonomic_factory.md").read_text()
-    require_phrases(industrial, ["industrial memory", "Jidoka", "poka-yoke", "Automated craftsmanship versus manufacture"], "industrial lineage", failures)
+    require_phrases((version_dir / "19_industrial_lineage_from_jig_to_autonomic_factory.md").read_text(), [
+        "industrial memory", "Jidoka", "poka-yoke", "Automated craftsmanship versus manufacture"
+    ], "industrial lineage", failures)
 
     core_ontology = (ROOT / "ontology/aps-core.ttl").read_text()
-    for marker in [
-        "http://www.w3.org/ns/prov#", "http://www.w3.org/ns/odrl/2/",
-        "http://www.w3.org/ns/shacl#", "http://www.w3.org/ns/dqv#"
-    ]:
+    for marker in ["http://www.w3.org/ns/prov#", "http://www.w3.org/ns/odrl/2/", "http://www.w3.org/ns/shacl#", "http://www.w3.org/ns/dqv#"]:
         if marker not in core_ontology:
             failures.append(f"core ontology missing public vocabulary {marker}")
     fibo = (ROOT / "ontology/fortune500-fibo-profile.ttl").read_text()
     if "https://spec.edmcouncil.org/fibo/ontology/master/latest/BE/LegalEntities/LegalPersons/" not in fibo:
         failures.append("FIBO profile missing admitted LegalPersons import")
-
-    for schema_path in sorted((ROOT / "contracts").glob("*.schema.json")):
-        schema = load_json(schema_path, failures)
-        if schema and not all(k in schema for k in ("$schema", "$id", "type")):
-            failures.append(f"schema lacks required meta fields: {rel(schema_path)}")
 
     enterprise = load_json(ROOT / "examples/fortune500-fibo/enterprise.json", failures)
     contract = load_json(ROOT / "examples/fortune500-fibo/knowledge-contract.json", failures)
@@ -198,13 +243,14 @@ def verify_repository() -> tuple[list[str], dict]:
         if manifest.get("predecessor", {}).get("commit") != "ab04337b2db63c66fa23c217bf76622fc9c73b6d":
             failures.append("MANIFEST predecessor coordinate mismatch")
 
+    validate_machine_readable(failures)
+
     if (ROOT / "specification-guide/book").exists() or (ROOT / "specification-guide/dist").exists():
         failures.append("generated book/dist outputs must not be committed as active source")
 
     authority_paths = [
         ROOT / "MANIFEST.json", ROOT / ".aps-syntax.md",
-        ROOT / "ontology/aps-core.ttl", ROOT / "ontology/jig-maturity.ttl",
-        ROOT / "ontology/fortune500-fibo-profile.ttl",
+        *sorted((ROOT / "ontology").glob("*.ttl")),
         *sorted((ROOT / "contracts").glob("*.json")),
         *[version_dir / name for name in EXPECTED_CHAPTERS],
     ]
@@ -225,7 +271,7 @@ def verify_repository() -> tuple[list[str], dict]:
         "checkedAuthorityFiles": checked,
         "failures": failures,
         "nonClaims": [
-            "ALIVE here means the repository satisfies its declared structural constitution.",
+            "ALIVE here means the repository satisfies its declared structural constitution and executable semantic/schema qualification.",
             "It does not prove Fortune-500 semantic closure, economic dominance, or safe universal actuation."
         ]
     }
