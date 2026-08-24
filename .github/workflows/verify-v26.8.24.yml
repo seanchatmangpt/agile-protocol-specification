@@ -1,0 +1,42 @@
+name: Verify APS v26.8.24 Reconstitution
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aps-v26-8-24-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify source constitution
+        run: python3 specification-guide/scripts/verify_v26_8_24.py
+      - name: Build mdBook
+        uses: peaceiris/actions-mdbook@ee69d230fe19748b7abf22df32acaa93833fad08
+        with:
+          mdbook-version: '0.4.52'
+      - name: Build current projection
+        run: mdbook build specification-guide
+      - name: Upload source receipt
+        if: always()
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
+        with:
+          name: APS-v26.8.24-source-${{ github.event.pull_request.head.sha || github.sha }}
+          path: receipts/APS-v26.8.24-source-verifier.json
+          if-no-files-found: error
+          retention-days: 30

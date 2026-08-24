@@ -1,0 +1,70 @@
+:root {
+  --content-max-width: 900px;
+}
+
+.content main {
+  max-width: var(--content-max-width);
+}
+
+main > h1:first-child {
+  border-bottom: 3px solid currentColor;
+  padding-bottom: 0.35em;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  margin-top: 1.75em;
+  border-bottom: 1px solid rgba(127, 127, 127, 0.35);
+  padding-bottom: 0.2em;
+}
+
+pre, code {
+  font-variant-ligatures: none;
+}
+
+blockquote {
+  border-left-width: 4px;
+}
+
+@media print {
+  html, body {
+    background: white !important;
+    color: #111 !important;
+  }
+
+  main {
+    max-width: none;
+    font-size: 10.4pt;
+    line-height: 1.45;
+  }
+
+  h1 {
+    break-before: page;
+    page-break-before: always;
+    font-size: 24pt;
+  }
+
+  main > h1:first-child {
+    break-before: auto;
+    page-break-before: auto;
+  }
+
+  h2, h3, h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  pre, blockquote, table, figure {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  table {
+    width: 100%;
+    font-size: 8.8pt;
+  }
+
+  a[href^="http"]::after {
+    content: "";
+  }
+}

@@ -2,8 +2,8 @@
 authors = ["Sean Chatman"]
 language = "en"
 src = "src"
-title = "Agile Protocol Specification v26.8.24"
-description = "A constitution for knowledge-work remanufacture, executable enterprise architecture, authority, process evidence, and standing."
+title = "Agile Protocol Specification v26.7.31"
+description = "A normative operating constitution for deterministic, evidence-bound human and agentic delivery."
 
 [build]
 build-dir = "book"

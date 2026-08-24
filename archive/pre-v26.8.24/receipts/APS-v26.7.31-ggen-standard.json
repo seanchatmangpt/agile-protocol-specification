@@ -1,0 +1,47 @@
+{
+  "schema": "aps.receipt.v26.7.31",
+  "operation_id": "aps-v26.7.31-ggen-standard",
+  "subject": "sha256:38b8ee70edc1856f91ce4667fc43fc6f99c7033b4d32e2c599fca8f2574879df",
+  "coordinate": {
+    "source": "seanchatmangpt/agile-protocol-specification",
+    "revision_kind": "SOURCE_SET",
+    "revision": "sha256:38b8ee70edc1856f91ce4667fc43fc6f99c7033b4d32e2c599fca8f2574879df",
+    "command": "python3 specification-guide/scripts/verify_ggen_v26_7_31.py",
+    "toolchain_contract": "python>=3.11",
+    "ggen_source_revision": "68952593c40214ac1a681073d65f3902a9cdfce4"
+  },
+  "standing": "ALIVE",
+  "metrics": {
+    "standards": 16,
+    "chapter_words": 2116,
+    "failures": 0
+  },
+  "failures": [],
+  "evidence": [
+    {
+      "kind": "profile",
+      "path": "specification-guide/standards/ggen-v26.7.62.json",
+      "sha256": "ccf77645b339de0a5d2b0ca016796d5e02d0868227abb49037a4fcbb1550becb"
+    },
+    {
+      "kind": "chapter",
+      "path": "specification-guide/src/v26_7_30/16_ggen_manufacturing_standard.md",
+      "sha256": "70b54b10e66861d8b3e238f1cf25f2b55578ac7920fdaac5c6474ec1d9df99dc"
+    },
+    {
+      "kind": "summary",
+      "path": "specification-guide/src/SUMMARY.md",
+      "sha256": "5c195666dcad1aa7b7489cef49c7eca1bb9ce4dc27a4ddd724b35059374ef2c3"
+    }
+  ],
+  "replay": {
+    "command": "python3 specification-guide/scripts/verify_ggen_v26_7_31.py",
+    "expected": "MATCH"
+  },
+  "nonclaims": [
+    "ALIVE is bounded to APS profile structure and invariant checks.",
+    "The ggen implementation was not executed by this verifier.",
+    "The APS receipt uses the existing SHA-256 receipt schema; ggen execution identities remain normatively BLAKE3.",
+    "No production actuation authority is granted."
+  ]
+}

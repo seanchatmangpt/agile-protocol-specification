@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aps:schema:receipt:v26.7.30",
+  "title": "APS Receipt v26.7.30",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "operation_id",
+    "subject",
+    "coordinate",
+    "standing",
+    "evidence",
+    "lineage",
+    "nonclaims"
+  ],
+  "properties": {
+    "schema": {
+      "const": "aps.receipt.v26.7.30"
+    },
+    "operation_id": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string",
+      "pattern": "^(sha256|blake3):[a-fA-F0-9]+$"
+    },
+    "coordinate": {
+      "type": "object",
+      "required": [
+        "source",
+        "revision",
+        "command",
+        "toolchain"
+      ],
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "command": {
+          "type": "string"
+        },
+        "toolchain": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "environment": {
+          "type": "string"
+        }
+      }
+    },
+    "standing": {
+      "enum": [
+        "PARTIAL_ALIVE",
+        "ALIVE",
+        "BLOCKED",
+        "BUILD_BROKEN",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "digest"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "digest": {
+            "type": "string"
+          },
+          "claim": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "required": [
+        "parents"
+      ],
+      "properties": {
+        "parents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "supersedes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "replay": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "expected": {
+          "enum": [
+            "MATCH",
+            "DIVERGED",
+            "UNSUPPORTED",
+            "UNKNOWN"
+          ]
+        }
+      }
+    },
+    "nonclaims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,74 +1,127 @@
 # Agile Protocol Specification
 
-**Current candidate:** v26.7.31  
-**Last immutable published projection:** v26.7.30
+**Current candidate:** v26.8.24
 
-The Agile Protocol Specification (APS) is a machine-readable operating constitution for converting intent into deterministic, bounded work orders for human and agentic delivery systems. APS defines identity, lifecycle, authority, falsifiers, evidence contracts, typed outcomes, receipts, and replay.
+APS is a constitution for **knowledge-work remanufacture**: recover truth from predecessor systems, admit bounded semantics and contracts, manufacture the largest lawful candidate space, execute only through explicit authority, emit process evidence, independently qualify consequences, and preserve reusable knowledge rather than incumbent implementations.
 
-APS is the input model for Gall checkpoint execution. APS declares what must be true before work begins. Gall observes execution and assigns bounded standing. BRCE remains the exclusive consequential DO path.
+## The governing law
+
+> **Chatman's Law:** In knowledge work, historical production cost confers no preservation privilege. As remanufacturing capability improves, durable value migrates from incumbent artifacts and production skills toward the recoverable knowledge, contracts, evidence, and manufacturing capability required to reproduce or improve their useful consequences.
+
+Compactly:
+
+```text
+everything is sunk
+-> preserve truth, not implementations
+-> manufacture from current admitted knowledge
+-> independently qualify
+```
+
+## What changed in v26.8.24
+
+This is a first-principles reconstitution of APS, not an incremental documentation update.
+
+The previous canonical corpus remains preserved as predecessor evidence. The new specification generalizes APS beyond agile work orders into a theory and protocol for continuously remanufacturing knowledge-work systems.
+
+The principal ideas are:
+
+- **zero continuation privilege** — incumbents do not survive merely because they exist;
+- **zero uninformed elimination** — recover required truth before sunset;
+- **reconstitution** — every predecessor state is evidence for the next state, not mandatory architecture;
+- **jig maturity** — measure whether manufacturing knowledge is actually embodied rather than trapped in experts;
+- **DfCM** — preserve and qualify a combinatorial candidate space before irreversible selection;
+- **contract before implementation** — implementation and verification are sibling projections of admitted authority;
+- **public semantics** — enterprise meaning should outlive frameworks, databases, SaaS products, and languages;
+- **executable enterprise architecture** — semantic authority can manufacture operational applications and mappings;
+- **universal execution** — arbitrary executables can be bound to admitted capability schemas rather than rewritten into architectural authority;
+- **full process intelligence** — consequential activity emits comparable evidence and feeds conformance/fitness learning;
+- **governance compression** — qualify source, manufacturing law, policy, and verifier law rather than millions of artifacts individually;
+- **enterprise code as inventory** — durable capital is semantic/manufacturing knowledge, not yesterday's implementation.
 
 ## Canonical source
 
-The canonical source is `specification-guide/src/`. The v26.7.31 candidate retains the v26.7.30 source path, with 18 top-level mdBook chapters and one nested Enterprise Architecture as Strategy chapter.
+The v26.8.24 mdBook source is:
 
-The principal current profiles are:
+`specification-guide/src/v26_8_24/`
 
-- Fortune-5 MCP/A2A simulation: `specification-guide/src/v26_7_30/15_mcp_a2a_safe_simulation.md`
-- AI-native operating model: `specification-guide/src/v26_7_30/16_ai_native_operating_model.md`
-- ggen manufacturing standard: `specification-guide/src/v26_7_30/16_ggen_manufacturing_standard.md`
-- Enterprise Architecture as Strategy: `specification-guide/src/v26_7_30/17_enterprise_architecture_as_strategy.md`
+Start with:
 
-The machine-readable ggen profiles are:
+1. `00_source_admission_and_paradigm_reset.md`
+2. `01_chatmans_law.md`
+3. `02_fuller_ephemeralization_and_reconstitution.md`
+4. `03_jig_maturity.md`
+5. `04_dfcm_and_adversarial_manufacturing_search.md`
+6. `05_executable_enterprise_architecture.md`
+7. `06_universal_execution_and_process_intelligence.md`
+8. `07_governance_compression.md`
+9. `08_fortune500_economics.md`
+10. `09_aps_constitution.md`
+11. `10_falsifiers_and_research_agenda.md`
 
-- `specification-guide/standards/ggen-v26.7.62.json`
-- `specification-guide/standards/ggen-enterprise-architecture-v26.7.31.json`
+`specification-guide/src/SUMMARY.md` is the active table of contents.
 
-The admitted ggen source coordinate is release `26.7.62` at revision `68952593c40214ac1a681073d65f3902a9cdfce4`.
+## Formal operating shape
 
-## Syntax
-
-The stable root syntax entry point is `.aps-syntax.md`. The normative semantics, lifecycle calculus, conformance profiles, work-order schema, and receipt schema remain in the mdBook and `specification-guide/schemas/`.
-
-## Validate canonical source
-
-```bash
-python3 specification-guide/scripts/verify_ggen_v26_7_31.py
-python3 specification-guide/scripts/verify_ea_strategy_v26_7_31.py
-python3 specification-guide/scripts/verify_v26_7_31.py
-python3 specification-guide/scripts/verify_wip_closure_v26_7_31.py
+```text
+predecessor / reality
+    -> observation
+    -> admitted knowledge O*
+    -> contract
+    -> DfCM candidate manufacturing space
+    -> CONSTRUCT
+    -> explicit admission / authority
+    -> DO
+    -> OCEL / provenance / receipts
+    -> independent verification
+    -> standing
+    -> reusable knowledge
+    -> next remanufacture
 ```
 
-The focused verifiers emit deterministic source-set receipts:
+The compact manufacturing equation remains:
 
-- `receipts/APS-v26.7.31-ggen-standard.json`
-- `receipts/APS-v26.7.31-ggen-enterprise-architecture.json`
-
-The full candidate verifier expands mdBook includes before checking chapter substance and emits `receipts/APS-v26.7.31-book-verifier.json`. The WIP verifier emits `receipts/APS-v26.7.31-wip-closure.json` as an exact-tree workflow artifact.
-
-## Run the Fortune-5 simulation
-
-```bash
-python3 simulation/fortune5-safe/scripts/verify.py --require-cargo
+```text
+A = mu(O*)
 ```
 
-The verifier exercises Rust formatting and tests, MCP and A2A fixtures, stdio and JSONL sessions, deterministic simulation, negative fixtures, receipt-chain invariants, and same-coordinate replay.
+where `O*` is admitted bounded knowledge, `mu` is lawful manufacture, and `A` receives only the standing justified by observed evidence.
 
-## Build projections
+## Standing
+
+APS uses explicit standing:
+
+- `ALIVE`
+- `PARTIAL_ALIVE`
+- `BLOCKED`
+- `BUILD_BROKEN`
+- `UNKNOWN`
+- `UNSUPPORTED`
+- typed `REFUSED` outcomes for inadmissible transitions
+
+No prose outranks executable evidence.
+
+## Archive
+
+The complete repository state immediately before this reconstitution is preserved by Git tree under:
+
+`archive/pre-v26.8.24/`
+
+The archive is evidence. It has no authority over the v26.8.24 design merely because it came first.
+
+## Build
 
 ```bash
 mdbook build specification-guide
 ```
 
-The Markdown source remains authority. HTML, PDF, diagrams, schemas generated from other authority, and workflow artifacts are projections or evidence surfaces.
+Generated HTML/PDF is a projection of canonical source.
 
-The committed v26.7.30 book and PDF remain the last immutable published projections. Pull-request workflows build the v26.7.31 HTML, PDF, simulation receipts, and exact-head publication receipt as immutable GitHub Actions artifacts. They do not repair source, commit generated files, or push the PR branch. Promotion into committed release outputs requires a separate explicit release actuation after all exact-head checks pass.
+## Research posture
 
-## Hard invariants
+The strongest claims in this repository are hypotheses until falsified against real systems. In particular, 'terminal to enterprise code' means **terminal to hand-authored enterprise code as the durable carrier of enterprise knowledge**, not the disappearance of executable instructions.
 
-- Generated outputs are not independent authority.
-- Lifecycle and evidentiary standing are separate.
-- `UNKNOWN` is not permission to claim success.
-- Direct architecture autonomics may observe, diagnose, plan, and emit intent; BRCE owns DO.
-- Zero unreceipted actuation.
-- Exact-head evidence is required for promotion.
-- Stage 5 is a ggen extension, not an original RWR maturity stage.
+The required proof program is defined in `10_falsifiers_and_research_agenda.md`.
+
+## License
+
+MIT.

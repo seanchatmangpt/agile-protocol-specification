@@ -1,0 +1,116 @@
+{
+  "schema": "aps.source-manifest.v26.7.30",
+  "base": "7a713c199e23f7b24b4c2d0d80a86996dd106f5c",
+  "files": [
+    {
+      "path": "APS_V26_7_30_RELEASE_NOTES.md",
+      "sha256": "42241d023d2ac86450657c864dbfa8287b0a2bc99dee0a680aa9134ea674393e",
+      "bytes": 1389
+    },
+    {
+      "path": "README.md",
+      "sha256": "80979dfb22a9d673303ac29e90d8786dfeb6cca390a14d3bc072af9336447607",
+      "bytes": 1169
+    },
+    {
+      "path": "specification-guide/examples/aps_v26_7_30_work_order.json",
+      "sha256": "bfdb96017d9c3811d23e0e74a4caaf46cf55a285b94a3513738aa4449ae523f2",
+      "bytes": 2296
+    },
+    {
+      "path": "specification-guide/schemas/receipt.schema.json",
+      "sha256": "196e7f338f02180d3f637bab3d45911a4448d59750893998c3ba9e017add526e",
+      "bytes": 2495
+    },
+    {
+      "path": "specification-guide/schemas/work_order.schema.json",
+      "sha256": "b40408989f00bc53701b1bd0a120adb4e109a9be6501e6628d9f769c78a53ffa",
+      "bytes": 5481
+    },
+    {
+      "path": "specification-guide/scripts/verify_v26_7_30.py",
+      "sha256": "57e630a62929b96660b715e6d7ec0dcdb19331a6a0c5c84215b8b8071c8a7cc5",
+      "bytes": 4244
+    },
+    {
+      "path": "specification-guide/src/SUMMARY.md",
+      "sha256": "1eb9ed9f0685aa4af4f0618ebc69ab631ea77c5ed3858d44e42f9d6c2bf1ac8d",
+      "bytes": 1177
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/00_source_admission.md",
+      "sha256": "56e090f32cb46228e4f2d060e1e391f5bc58eb16b399c736bcb4ed911bc91db1",
+      "bytes": 5342
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/01_constitution.md",
+      "sha256": "ce54a5773a668cc46b1b8b9a5d6a5ef706cde7133d001a24884014292e8bdbc4",
+      "bytes": 6573
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/02_formal_semantics.md",
+      "sha256": "44a0313ec826897fbe794ecb0ce00271e5ffc1fbeb51d6a4f66e49b42a493be6",
+      "bytes": 5692
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/03_aps_gall_boundary.md",
+      "sha256": "9e8f379b414dbcec90b259910c484ee697e0dde5389a8f7806c8d18fc32362d0",
+      "bytes": 4846
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/04_conformance.md",
+      "sha256": "cc4cbd8d273eebfcebba120a43f1a694c7c3539022ea00f003e5196d89b7b59d",
+      "bytes": 4401
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/05_lifecycle.md",
+      "sha256": "a00c491e03327f7e3b56a065d3184616c77a18c52c77ec2023db76bed64e2209",
+      "bytes": 18474
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/06_metadata_naming_structure.md",
+      "sha256": "592196ce88909be195156d83126a3032b1773851ad7d256d2756a040adc7a0fe",
+      "bytes": 32040
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/07_versioning_reconciliation.md",
+      "sha256": "ac39d8896146290f5d6b91ef33fa4345ba26a5287eec9e3ab6d5c078789770d1",
+      "bytes": 22005
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/08_adversarial_review.md",
+      "sha256": "0e7c7656fce260079eb78b8d24ccb48b8775fd9d26f8bce645195c4ba19eef9f",
+      "bytes": 21987
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/09_governance_compliance.md",
+      "sha256": "4bad4d25362093004e4c1db186c81d09a7dd3928e1633cc0c5a2ef5b8dfe35ba",
+      "bytes": 15702
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/10_tools_automation.md",
+      "sha256": "a42265436a35abe95863434a4aa802c33f740920f23ce0b5401d36989dbfdaea",
+      "bytes": 16541
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/11_operating_practice.md",
+      "sha256": "5a6dde523ad996e5627fac5f00a6e797db4fc6566d644bdcf75e4ea9955b7c62",
+      "bytes": 11513
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/12_case_studies.md",
+      "sha256": "b330d73268d058eac781b8581e70e005782880a4576bf792659f48c17f755bf1",
+      "bytes": 6759
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/13_templates_glossary_faq.md",
+      "sha256": "8ec1833eb7be5c001c1b9ab434c1c6d8754b8d238a7154da8929706cb44bd837",
+      "bytes": 21351
+    },
+    {
+      "path": "specification-guide/src/v26_7_30/14_change_log_references.md",
+      "sha256": "e4ee66bb4dea5d2bc74abe93b62e61c60354c9e651177d3f422aed762bf57161",
+      "bytes": 20136
+    }
+  ]
+}
