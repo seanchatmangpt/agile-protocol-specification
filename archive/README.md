@@ -1,18 +1,27 @@
-# Pre-v26.8.24 Repository Archive
+# Pre-v26.8.24 Markdown Archive
 
-This directory is an immutable Git-tree view of the APS repository immediately before the v26.8.24 first-principles reconstitution.
+This directory preserves the APS Markdown knowledge corpus immediately before the v26.8.24 first-principles reconstitution.
 
-**Source commit:** `ab04337b2db63c66fa23c217bf76622fc9c73b6d`  
-**Source tree:** `01a68a29b3709d9331ff828e9275fe819322bc16`
+**Source commit:** `ab04337b2db63c66fa23c217bf76622fc9c73b6d`
 
-The archived material is evidence of the predecessor system. It is intentionally preserved so that no useful historical knowledge must be destroyed merely to remove continuation privilege from the old design.
+The archive includes:
 
-Under Chatman's Law, archive status means:
+- predecessor root documentation;
+- the complete predecessor `specification-guide/src` Markdown tree;
+- predecessor `.claude` agent, command, rule, and skill Markdown;
+- the Fortune-5 simulation README;
+- Markdown receipt evidence.
+
+Executable code, active workflows, binary/generated book assets, and non-Markdown receipts are not duplicated here; they remain exactly recoverable from the immutable source commit.
+
+The archived material is evidence, not current design authority.
+
+Under Chatman's Law:
 
 - historical cost creates no authority over the successor;
 - prior claims may still be useful observations;
-- old receipts retain only the standing justified at their recorded coordinates;
+- old evidence retains only the standing justified at its recorded coordinate;
 - old documentation must not be treated as current merely because it is more detailed;
 - reconstitution may recover patterns from this corpus when they remain useful.
 
-The active candidate begins at `../../README.md` and `../../specification-guide/src/v26_8_24/`.
+The active candidate begins at repository-root `README.md` and `specification-guide/src/v26_8_24/`.
