@@ -78,7 +78,7 @@ An adversary wins by discovering a plausible state in which the system's claimed
 claim C + failure condition f -> not(C)
 ```
 
-A discovered adversarial win condition becomes a candidate requirement only after it is made explicit and tested. Criticism is not automatically truth; it is a source of unexplored state space.
+A discovered adversarial win condition becomes a **candidate falsifier** before it becomes a requirement. It must be made explicit, exercised, and admitted or rejected by evidence. Criticism is not automatically truth; it is a source of unexplored state space.
 
 ## Adversarial requirements generation
 
