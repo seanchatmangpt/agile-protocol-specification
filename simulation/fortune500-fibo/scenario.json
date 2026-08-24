@@ -1,0 +1,11 @@
+{
+  "scenario": "synthetic-fibo-enterprise-remanufacture",
+  "version": "26.8.24",
+  "model": "examples/fortune500-fibo/enterprise.json",
+  "contract": "examples/fortune500-fibo/knowledge-contract.json",
+  "reconstitution": "examples/fortune500-fibo/reconstitution.json",
+  "processEvents": "examples/fortune500-fibo/process-events.json",
+  "runner": "tools/simulate_fortune500.py",
+  "standing": "PARTIAL_ALIVE",
+  "standingReason": "The deterministic sensitivity model is executable; real-enterprise semantic closure and economic dominance remain unproven crown obligations."
+}

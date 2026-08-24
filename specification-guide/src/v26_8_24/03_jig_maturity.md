@@ -1,117 +1,83 @@
-# Jig Maturity: From Capability to Self-Improving Manufacture
+# Five-Level × Seven-Dimension Jig Maturity
 
-APS uses a jig maturity model to prevent internal engine sophistication from being confused with manufacturing maturity.
+The historical jig matters because it moved manufacturing knowledge out of the craftsperson and into repeatable production equipment. APS uses that industrial progression before applying it to software.
 
-The decisive question is operator-independent repeatability:
+The model is exactly **five levels by seven dimensions**. There is no Level 0 baseline in the maturity ladder.
 
-> Does the production system itself locate the work, constrain the operation, prevent invalid transformations, qualify the result, and improve from evidence without requiring tacit reconstruction by the inventor?
+## The five levels
 
-## Levels
+### L1 — Craft
 
-### Level 0 — Capability without embodied method
+The worker carries the coordinate system, sequence, technique, inspection knowledge, and correction method. Quality depends heavily on tacit expertise. The product can be excellent, but production knowledge is not embodied in a reusable manufacturing system.
 
-Useful transformations exist, but the end-to-end manufacturing method remains substantially tacit. Experts can make the system work. New operators must reconstruct where to start, what is authoritative, what sequence is current, and how completion is proven.
+### L2 — Template
 
-### Level 1 — Defined workpiece
+The desired form or specification is externalized. A template reduces interpretation but normally does not locate the workpiece, constrain the operation, enforce sequence, or independently qualify the result.
 
-The system has one canonical definition of:
+### L3 — Fixture
 
-- what enters manufacture;
-- what finished output means;
-- which semantics and contracts are authoritative;
-- which consequences are projections rather than independent sources of truth.
+The workpiece is located and held against explicit datums. Variation due to positioning falls sharply. The fixture stabilizes the operation but does not necessarily guide the transforming tool or encode the complete process.
 
-### Level 2 — Fixture
+### L4 — Jig
 
-The system establishes canonical datums and location:
+The tooling embodies both location and operation guidance. It constrains what operation can occur, where it occurs, and often in what sequence. Poka-yoke and interlocks can make invalid transformations difficult or impossible. Manufacturing knowledge has migrated materially from worker judgment into the production system.
 
-- project root;
-- authority manifest;
-- input locations;
-- pack/capability bindings;
-- target/output locations;
-- environment and version coordinates.
+### L5 — Closed-Loop Manufacturing System
 
-An operator does not ask, 'Where does this go?'
+The system combines jig-like constraint with independent metrology, process evidence, feedback, reconfiguration, and controlled learning. It can qualify both product and process and can turn observed exceptions or successful novelty into candidate improvements to reusable manufacturing capability.
 
-### Level 3 — Jig
+## The seven dimensions
 
-The system constrains the manufacturing operation itself:
+| Dimension | L1 — Craft | L2 — Template | L3 — Fixture | L4 — Jig | L5 — Closed-Loop Manufacturing System |
+|---|---|---|---|---|---|
+| Product knowledge | Desired result mainly in craft knowledge | Shape/specification externalized | Product references tied to repeatable datums | Product requirements embodied in tooling | Machine-readable product definition drives and constrains production |
+| Work positioning | Worker manually locates work | Template provides reference | Fixture deterministically locates and holds work | Jig couples work position to operation | System selects/configures positioning and verifies datum state |
+| Operation guidance | Worker decides how to transform | Pattern/instruction suggests operation | Work is stabilized but transformation remains operator-directed | Tool/action/path is constrained by the jig | Operation is configured from admitted manufacturing knowledge and live state |
+| Process sequence | Sequence depends on worker judgment | Recommended sequence documented | Repeatable setup supports standard sequence | Tooling constrains or enforces legal sequence | Multi-stage process is orchestrated, state-aware, and evidence-bound |
+| Error prevention | Skill and rework catch errors | Visual reference reduces error | Incorrect positioning becomes harder | Poka-yoke/interlocks prevent many invalid operations | Invalid transitions are refused before consequence and abnormal states trigger controlled response |
+| Measurement & qualification | Worker judges quality | Compare with template/master | Repeatability and datum conformance can be measured | Independent gauges/tolerances qualify output | Inline metrology qualifies product and process with replayable evidence |
+| Adaptation & learning | Improvement remains tacit with craftsperson | Better templates are manually created | Fixtures are redesigned from observed variation | Jigs improve from defect/process evidence | Successful learning becomes candidate reusable manufacturing knowledge after independent qualification |
 
-- legal operations;
-- tool selection;
-- generator invocation;
-- sequence;
-- preconditions;
-- postconditions;
-- bounded actuation;
-- refusals.
+## Do not average away bottlenecks
 
-An operator does not ask, 'What do I run now?'
-
-### Level 4 — Qualified jig
-
-The jig includes independent metrology and poka-yoke:
-
-- invalid operations are structurally refused;
-- manufactured artifacts are independently qualified;
-- evidence binds source, manufacturing law, observed consequence, and coordinate;
-- replay and tamper detection exist;
-- governance cost does not scale linearly with artifact count.
-
-### Level 5 — Learning factory
-
-Observed exceptions and successful novel mechanisms can become candidate reusable manufacturing knowledge.
+Represent maturity as a vector:
 
 ```text
-exception / novelty
-  -> classify
-  -> candidate contract or jig improvement
-  -> falsify
-  -> admit
-  -> reusable manufacturing capability
+J = <product, positioning, guidance, sequence, prevention, metrology, learning>
 ```
 
-The system improves the factory rather than merely patching the current artifact.
+with each dimension in `L1..L5`.
 
-## Seven maturity dimensions
+A single scalar can hide the exact weakness that keeps a factory dependent on expert reconstruction. A system may have L5 measurement and only L2 operation guidance. The profile is more informative than the mean.
 
-Each level must be considered across seven independent dimensions:
+## What the phase changes mean
 
-| Dimension | Governing question |
-|---|---|
-| Product knowledge | What should exist? |
-| Work positioning | Where is the work and what is its datum? |
-| Operation guidance | How is transformation performed? |
-| Process sequence | In what order? |
-| Error prevention | What must be impossible? |
-| Measurement and qualification | How is correctness established independently? |
-| Adaptation and learning | How does evidence improve reusable manufacture? |
+```text
+Craft -> Template
+```
 
-Do not average the dimensions into a reassuring scalar. A high metrology score does not compensate for an undefined workpiece. A sophisticated engine can coexist with a Level-0 operator experience.
+externalizes product knowledge.
 
-## Current ggen baseline as an APS case
+```text
+Template -> Fixture
+```
 
-The current ggen ecosystem is treated as a Level-0 baseline for jig design, irrespective of advanced internal capabilities. This is an intentional reset, not a dismissal of existing work.
+externalizes datum and positioning knowledge.
 
-The diagnostic is simple: if even an expert must reconstruct what a canonical ggen project looks like end to end, which documentation is current, where manufacturing authority resides, or which operation comes next, then the jig knowledge has not yet been embodied.
+```text
+Fixture -> Jig
+```
 
-The next breakthrough is therefore not 'better templates'. It is an executable canonical fixture and operation law in which human and machine operators do not need repository archaeology to manufacture lawfully.
+externalizes operation knowledge.
 
-## L1 acceptance test for a manufacturing system
+```text
+Jig -> Closed Loop
+```
 
-Give an operator only an objective, an empty workspace, and the manufacturing executable/capability endpoint.
+externalizes qualification, feedback, and reusable learning.
 
-Without private knowledge, historical chat, or archaeology, the system must make it possible to discover:
+The central industrial lesson is not automation for its own sake. It is the relocation of production knowledge from individual memory into inspectable, reusable, qualified manufacturing capital.
 
-1. the canonical workpiece;
-2. the authority surfaces;
-3. the admitted inputs;
-4. the available manufacturing capabilities;
-5. the complete planned consequences;
-6. the next legal operation;
-7. the independent qualification route;
-8. current standing;
-9. the next lawful transition.
+## Applying the matrix later
 
-Any step that requires 'ask the inventor' is unembodied manufacturing knowledge.
+When APS applies this model to a software factory, sophistication inside the engine does not automatically earn a higher level. The question remains whether a new operator can discover the workpiece, locate authority, perform the legal operation, prevent invalid consequence, qualify the result, and improve the factory without reconstructing private inventor knowledge.

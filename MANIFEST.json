@@ -1,0 +1,50 @@
+{
+  "schema": "aps.repository-manifest.v26.8.24",
+  "version": "26.8.24",
+  "status": "candidate",
+  "purpose": "Executable constitution for public-semantic, contract-first, evidence-bound knowledge-work reconstitution and autonomic manufacturing.",
+  "predecessor": {
+    "commit": "ab04337b2db63c66fa23c217bf76622fc9c73b6d",
+    "role": "immutable predecessor evidence; no continuation privilege"
+  },
+  "authority": {
+    "syntax": ".aps-syntax.md",
+    "book": "specification-guide/src/v26_8_24",
+    "navigation": "specification-guide/src/SUMMARY.md",
+    "ontology": [
+      "ontology/aps-core.ttl",
+      "ontology/jig-maturity.ttl",
+      "ontology/fortune500-fibo-profile.ttl"
+    ],
+    "contracts": "contracts/*.schema.json",
+    "agentConstitution": "AGENTS.md"
+  },
+  "executableQualification": {
+    "repositoryVerifier": "tools/verify.py",
+    "tests": "tests/",
+    "syntheticEnterpriseModel": "tools/simulate_fortune500.py",
+    "workflow": ".github/workflows/verify-v26.8.24.yml"
+  },
+  "evidence": {
+    "activeReceipts": "GitHub Actions exact-head artifacts",
+    "committedReceiptPolicy": "Do not commit a success receipt that predates its own source commit.",
+    "archive": "archive/pre-v26.8.24"
+  },
+  "governingInvariants": [
+    "Everything is sunk at the next decision boundary.",
+    "Preserve truth, not implementations.",
+    "Zero continuation privilege.",
+    "Zero uninformed elimination.",
+    "Contract before implementation.",
+    "Known pattern before novel mechanism.",
+    "No ambient DO authority.",
+    "Zero unreceipted actuation.",
+    "No prose outranks evidence.",
+    "Governance scales with law, not artifact count.",
+    "The factory itself must remain reconstitutable."
+  ],
+  "nonClaims": [
+    "Repository conformance does not prove Fortune-500 semantic closure or economic dominance.",
+    "The Fortune-500 FIBO example is a synthetic sensitivity model, not an empirical company forecast.",
+    "No file in this repository grants production actuation authority."
+  ]

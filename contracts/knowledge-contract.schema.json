@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/chatman/aps/v26.8.24/knowledge-contract.schema.json",
+  "title": "APS Knowledge Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractId", "semanticSubjects", "preconditions", "postconditions", "invariants", "refusals", "authority", "evidence", "standingRule"],
+  "properties": {
+    "contractId": {"type":"string","minLength":1},
+    "semanticSubjects": {"type":"array","minItems":1,"items":{"type":"string","format":"uri"}},
+    "preconditions": {"type":"array","items":{"type":"string"}},
+    "postconditions": {"type":"array","items":{"type":"string"}},
+    "invariants": {"type":"array","items":{"type":"string"}},
+    "refusals": {"type":"array","items":{"type":"string"}},
+    "authority": {"type":"object","required":["required"],"properties":{"required":{"type":"boolean"},"policyRefs":{"type":"array","items":{"type":"string"}}}},
+    "evidence": {"type":"object","required":["receiptRequired","independentVerification"],"properties":{"receiptRequired":{"type":"boolean"},"independentVerification":{"type":"boolean"},"processEventRequired":{"type":"boolean"}}},
+    "resourceBounds": {"type":"object"},
+    "compatibility": {"type":"array","items":{"type":"string"}},
+    "standingRule": {"$ref":"standing.schema.json"}
+  }
+}

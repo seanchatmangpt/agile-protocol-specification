@@ -1,4 +1,4 @@
-name: Verify APS v26.8.24 Reconstitution
+name: Verify APS v26.8.24 Whole Repository
 
 on:
   pull_request:
@@ -11,32 +11,81 @@ permissions:
   contents: read
 
 concurrency:
-  group: aps-v26-8-24-${{ github.event.pull_request.head.sha || github.sha }}
+  group: aps-v26.8.24-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - name: Check out exact candidate
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
-      - name: Verify source constitution
-        run: python3 specification-guide/scripts/verify_v26_8_24.py
-      - name: Build mdBook
+
+      - name: Establish exact-head coordinate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+          echo "APS_SOURCE_REVISION=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Compile verifier and tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/verify.py tools/simulate_fortune500.py tests/*.py
+
+      - name: Qualify whole repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/verify.py --receipt /tmp/aps-repository-receipt.json
+          python3 -m unittest discover -s tests -v
+
+      - name: Install mdBook
         uses: peaceiris/actions-mdbook@ee69d230fe19748b7abf22df32acaa93833fad08
         with:
-          mdbook-version: '0.4.52'
-      - name: Build current projection
-        run: mdbook build specification-guide
-      - name: Upload source receipt
+          mdbook-version: '0.5.4'
+
+      - name: Build active specification projection
+        shell: bash
+        run: |
+          set -euo pipefail
+          mdbook build -d /tmp/aps-book specification-guide
+          test -s /tmp/aps-book/index.html
+
+      - name: Execute synthetic Fortune-500 sensitivity model
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/simulate_fortune500.py \
+            examples/fortune500-fibo/enterprise.json \
+            --receipt /tmp/aps-f500-sensitivity.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path('/tmp/aps-f500-sensitivity.json').read_text())
+          assert r['standing'] == 'ALIVE', r
+          assert r['evidenceClass'] == 'SYNTHETIC_SENSITIVITY_MODEL_NOT_FORECAST', r
+          PY
+
+      - name: Assert verifier is read-only on repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+          test -z "$(git status --porcelain --untracked-files=all)"
+
+      - name: Upload exact-head evidence
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
-          name: APS-v26.8.24-source-${{ github.event.pull_request.head.sha || github.sha }}
-          path: receipts/APS-v26.8.24-source-verifier.json
-          if-no-files-found: error
+          name: APS-v26.8.24-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            /tmp/aps-repository-receipt.json
+            /tmp/aps-f500-sensitivity.json
+          if-no-files-found: warn
           retention-days: 30

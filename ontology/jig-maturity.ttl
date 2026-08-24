@@ -1,0 +1,19 @@
+@prefix aps: <https://w3id.org/chatman/aps#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+aps:JigMaturity a skos:ConceptScheme ; dcterms:title "APS five-level, seven-dimension jig maturity model" .
+
+aps:L1Craft a skos:Concept ; skos:inScheme aps:JigMaturity ; skos:notation "L1" ; skos:prefLabel "Craft" .
+aps:L2Template a skos:Concept ; skos:inScheme aps:JigMaturity ; skos:notation "L2" ; skos:prefLabel "Template" ; skos:broader aps:L1Craft .
+aps:L3Fixture a skos:Concept ; skos:inScheme aps:JigMaturity ; skos:notation "L3" ; skos:prefLabel "Fixture" ; skos:broader aps:L2Template .
+aps:L4Jig a skos:Concept ; skos:inScheme aps:JigMaturity ; skos:notation "L4" ; skos:prefLabel "Jig" ; skos:broader aps:L3Fixture .
+aps:L5ClosedLoopManufacturing a skos:Concept ; skos:inScheme aps:JigMaturity ; skos:notation "L5" ; skos:prefLabel "Closed-Loop Manufacturing System" ; skos:broader aps:L4Jig .
+
+aps:ProductKnowledge a skos:Concept ; skos:prefLabel "Product knowledge" .
+aps:WorkPositioning a skos:Concept ; skos:prefLabel "Work positioning" .
+aps:OperationGuidance a skos:Concept ; skos:prefLabel "Operation guidance" .
+aps:ProcessSequence a skos:Concept ; skos:prefLabel "Process sequence" .
+aps:ErrorPrevention a skos:Concept ; skos:prefLabel "Error prevention" .
+aps:MeasurementQualification a skos:Concept ; skos:prefLabel "Measurement and qualification" .
+aps:AdaptationLearning a skos:Concept ; skos:prefLabel "Adaptation and learning" .

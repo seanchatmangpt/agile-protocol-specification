@@ -1,88 +1,29 @@
-# CLAUDE.md — APS v26.8.24 Contributor Constitution
+# CLAUDE.md — APS v26.8.24
 
-## Repository purpose
+`AGENTS.md` is the general repository constitution. This file adds Claude-specific execution guidance.
 
-APS defines a protocol for knowledge-work remanufacture under explicit authority, evidence, and standing.
+## Start here
 
-The active doctrine is in `specification-guide/src/v26_8_24/`. Older material is predecessor evidence, not default design authority.
+1. Read `MANIFEST.json`.
+2. Read `.aps-syntax.md`.
+3. Read `specification-guide/src/SUMMARY.md` and relevant active chapters.
+4. Treat `archive/` as evidence only.
+5. Run `python3 tools/verify.py --no-receipt` before and after structural changes.
 
-## Core laws
+## Do not preserve sunk structure by default
 
-1. Everything is sunk cost at the next decision boundary.
-2. Preserve truth, not implementations.
-3. Zero continuation privilege.
-4. Zero uninformed elimination.
-5. Contract before implementation.
-6. Prefer known reusable manufacturing patterns and compositions before novel mechanism.
-7. Separate SELECT, CONSTRUCT, and DO.
-8. No ambient DO authority.
-9. Zero unreceipted actuation for claims of APS standing.
-10. No prose outranks observed evidence.
-11. Treat plausible adversarial objections as candidate falsifiers.
-12. The manufacturing system itself must remain reconstitutable.
+The correct question is not “how do I modify this file?” but “what truth does this file carry, and what should the successor manufacturing system look like if the incumbent implementation has no preservation privilege?”
 
-## Working method
+Recover required truth before removing an incumbent. Reconstitute rather than cosmetically modernize when the object model has changed.
 
-Before editing an incumbent surface, ask whether it should exist in the successor at all. Historical effort is not a preservation argument.
+## Manufacturing behavior
 
-For changes that affect architecture:
+Prefer public ontology + bounded local profile + executable contract + generated/manufactured consequence. Prefer reusable manufacturing patterns and generated tool invocations over handwritten glue. Use handwritten code only for irreducible mechanism or bootstrap boundaries that cannot yet be lawfully manufactured, and make the reason explicit.
 
-```text
-observe predecessor
--> recover required truth
--> state contract
--> preserve lawful candidate space
--> construct
--> independently verify
--> assign standing
-```
+Maximize lawful reversible candidate space with DfCM. Do not interpret “good engineering” as automatically minimizing files, commits, variants, or candidate implementations.
 
-Do not silently equate compilation, generation, CI success, or a receipt with crown-level fitness.
+## Claim discipline
 
-## Documentation authority
+A passing structural verifier proves only structural conformance. The synthetic Fortune-500 model proves only deterministic arithmetic over declared assumptions. Neither proves the long-horizon enterprise crown hypothesis.
 
-- `README.md` is the public entry point.
-- `specification-guide/src/SUMMARY.md` defines active mdBook navigation.
-- `specification-guide/src/v26_8_24/` is the current candidate human-readable source.
-- `archive/pre-v26.8.24/` preserves the predecessor repository tree.
-- Generated HTML/PDF is projection, not independent authority.
-
-## Standing vocabulary
-
-Use `ALIVE`, `PARTIAL_ALIVE`, `BLOCKED`, `BUILD_BROKEN`, `UNKNOWN`, `UNSUPPORTED`, and typed `REFUSED` precisely.
-
-If evidence is absent or stale, use `UNKNOWN` rather than narrative confidence.
-
-## Public semantics
-
-Prefer public ontologies and standards where they lawfully express the domain. Enterprise-specific facts and operational closure may extend/profile public semantics, but private reinvention requires justification.
-
-Do not claim that any ontology, framework, generator, language, database, or APS itself is permanent authority. All are subject to Chatman's Law.
-
-## Adversarial review
-
-A reviewer should actively search for states in which a claimed standing would be false, especially:
-
-- catastrophic consequence;
-- ambiguous authority;
-- unreconstructable decisions;
-- process conformance without process fitness;
-- artifact volume that defeats governance;
-- evidence dependent on an ephemeral model/session;
-- semantic drift;
-- replay mismatch;
-- hidden human decisions in allegedly manufactured output.
-
-Convert plausible attacks into explicit falsifiers rather than arguments.
-
-## Build
-
-```bash
-mdbook build specification-guide
-```
-
-A successful book build proves only that the current Markdown projection is structurally buildable.
-
-## Change discipline
-
-Prefer coherent first-principles replacement over additive prose accumulation. If a prior document is superseded, archive or version it rather than leaving multiple apparently-current authorities.
+Use the narrowest evidence-earned standing.

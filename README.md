@@ -1,127 +1,176 @@
-# Agile Protocol Specification
+# Agile Protocol Specification v26.8.24
 
-**Current candidate:** v26.8.24
+APS is an executable constitution for **knowledge-work reconstitution and autonomic manufacturing**.
 
-APS is a constitution for **knowledge-work remanufacture**: recover truth from predecessor systems, admit bounded semantics and contracts, manufacture the largest lawful candidate space, execute only through explicit authority, emit process evidence, independently qualify consequences, and preserve reusable knowledge rather than incumbent implementations.
+It starts from a simple law:
 
-## The governing law
-
-> **Chatman's Law:** In knowledge work, historical production cost confers no preservation privilege. As remanufacturing capability improves, durable value migrates from incumbent artifacts and production skills toward the recoverable knowledge, contracts, evidence, and manufacturing capability required to reproduce or improve their useful consequences.
+> **Chatman's Law:** historical production cost confers no preservation privilege. Durable value migrates toward the recoverable knowledge, contracts, evidence, and manufacturing capability needed to reproduce or improve useful consequences.
 
 Compactly:
 
 ```text
 everything is sunk
 -> preserve truth, not implementations
--> manufacture from current admitted knowledge
+-> contract before implementation
+-> manufacture the largest lawful candidate space
+-> authorize consequence explicitly
 -> independently qualify
+-> turn evidence into reusable manufacturing knowledge
+-> reconstitute again
 ```
 
-## What changed in v26.8.24
+## This repository is the specification
 
-This is a first-principles reconstitution of APS, not an incremental documentation update.
-
-The previous canonical corpus remains preserved as predecessor evidence. The new specification generalizes APS beyond agile work orders into a theory and protocol for continuously remanufacturing knowledge-work systems.
-
-The principal ideas are:
-
-- **zero continuation privilege** — incumbents do not survive merely because they exist;
-- **zero uninformed elimination** — recover required truth before sunset;
-- **reconstitution** — every predecessor state is evidence for the next state, not mandatory architecture;
-- **jig maturity** — measure whether manufacturing knowledge is actually embodied rather than trapped in experts;
-- **DfCM** — preserve and qualify a combinatorial candidate space before irreversible selection;
-- **contract before implementation** — implementation and verification are sibling projections of admitted authority;
-- **public semantics** — enterprise meaning should outlive frameworks, databases, SaaS products, and languages;
-- **executable enterprise architecture** — semantic authority can manufacture operational applications and mappings;
-- **universal execution** — arbitrary executables can be bound to admitted capability schemas rather than rewritten into architectural authority;
-- **full process intelligence** — consequential activity emits comparable evidence and feeds conformance/fitness learning;
-- **governance compression** — qualify source, manufacturing law, policy, and verifier law rather than millions of artifacts individually;
-- **enterprise code as inventory** — durable capital is semantic/manufacturing knowledge, not yesterday's implementation.
-
-## Canonical source
-
-The v26.8.24 mdBook source is:
-
-`specification-guide/src/v26_8_24/`
-
-Start with:
-
-1. `00_source_admission_and_paradigm_reset.md`
-2. `01_chatmans_law.md`
-3. `02_fuller_ephemeralization_and_reconstitution.md`
-4. `03_jig_maturity.md`
-5. `04_dfcm_and_adversarial_manufacturing_search.md`
-6. `05_executable_enterprise_architecture.md`
-7. `06_universal_execution_and_process_intelligence.md`
-8. `07_governance_compression.md`
-9. `08_fortune500_economics.md`
-10. `09_aps_constitution.md`
-11. `10_falsifiers_and_research_agenda.md`
-
-`specification-guide/src/SUMMARY.md` is the active table of contents.
-
-## Formal operating shape
+The active repository is deliberately small enough to identify its authority surfaces and broad enough to exercise them. It is no longer a documentation book wrapped around predecessor work-order machinery.
 
 ```text
-predecessor / reality
-    -> observation
-    -> admitted knowledge O*
-    -> contract
-    -> DfCM candidate manufacturing space
-    -> CONSTRUCT
-    -> explicit admission / authority
-    -> DO
-    -> OCEL / provenance / receipts
-    -> independent verification
-    -> standing
-    -> reusable knowledge
-    -> next remanufacture
+MANIFEST.json                         authority map
+.aps-syntax.md                        compact protocol syntax
+ontology/                             public-ontology-aligned semantic profiles
+contracts/                            executable contract/evidence envelopes
+specification-guide/src/v26_8_24/     normative manuscript
+examples/fortune500-fibo/             synthetic enterprise contract/reconstitution case
+simulation/                           executable sensitivity scenario
+ tools/                               whole-repository verifier + deterministic model
+ tests/                               state/structure qualification
+ .github/workflows/                    exact-head qualification court
+ archive/                              predecessor evidence only
 ```
 
-The compact manufacturing equation remains:
+## Governing architecture
+
+```text
+reality / predecessor
+  -> observation
+  -> admitted knowledge O*
+  -> executable contract
+  -> DfCM candidate manufacturing space
+  -> SELECT
+  -> CONSTRUCT
+  -> explicit authority / refusal
+  -> DO
+  -> object-centric process evidence + receipts
+  -> independent verification
+  -> standing
+  -> reusable knowledge
+  -> next reconstitution
+```
+
+The manufacturing equation is:
 
 ```text
 A = mu(O*)
 ```
 
-where `O*` is admitted bounded knowledge, `mu` is lawful manufacture, and `A` receives only the standing justified by observed evidence.
+Generated artifacts are consequences; they do not become independent semantic authority merely because they execute.
 
-## Standing
+## Contract-first, ggen-first law
 
-APS uses explicit standing:
+**Known pattern? Compose it.**
 
-- `ALIVE`
-- `PARTIAL_ALIVE`
-- `BLOCKED`
-- `BUILD_BROKEN`
-- `UNKNOWN`
-- `UNSUPPORTED`
-- typed `REFUSED` outcomes for inadmissible transitions
+**Known tool? Generate its invocation.**
 
-No prose outranks executable evidence.
+**Novel mechanism? Discover it once, then teach the factory.**
 
-## Archive
+A specialized framework generator, compiler, migration tool, package manager, infrastructure engine, or external executable is capital equipment. Upstream manufacturing should produce its declarations, configuration, scripts, and invocations whenever those are derivable.
 
-The complete repository state immediately before this reconstitution is preserved by Git tree under:
+Applications therefore carry a strong presumption of manufacture. Libraries retain genuinely irreducible mechanism while their surrounding APIs, types, adapters, tests, docs, packaging, and bindings remain candidates for manufacture.
 
-`archive/pre-v26.8.24/`
+## Five-level × seven-dimension jig model
 
-The archive is evidence. It has no authority over the v26.8.24 design merely because it came first.
+APS uses the industrial progression:
 
-## Build
-
-```bash
-mdbook build specification-guide
+```text
+L1 Craft -> L2 Template -> L3 Fixture -> L4 Jig -> L5 Closed-Loop Manufacturing System
 ```
 
-Generated HTML/PDF is a projection of canonical source.
+across seven dimensions:
 
-## Research posture
+1. product knowledge;
+2. work positioning;
+3. operation guidance;
+4. process sequence;
+5. error prevention;
+6. measurement & qualification;
+7. adaptation & learning.
 
-The strongest claims in this repository are hypotheses until falsified against real systems. In particular, 'terminal to enterprise code' means **terminal to hand-authored enterprise code as the durable carrier of enterprise knowledge**, not the disappearance of executable instructions.
+This is a maturity vector, not a comforting average. A sophisticated engine can still depend on craft knowledge in one dimension.
 
-The required proof program is defined in `10_falsifiers_and_research_agenda.md`.
+## Synthetic FIBO Fortune-500 experiment
 
-## License
+`ontology/fortune500-fibo-profile.ttl` and `examples/fortune500-fibo/` define a **synthetic** financial-enterprise case using FIBO Legal Persons as a public semantic substrate.
 
-MIT.
+The deterministic sensitivity model asks what happens to manufacturing volume and full human lifecycle-equivalent effort when admitted enterprise capabilities project across many interfaces, environments, and DfCM architecture candidates. It also models board-level governance compression by validating source classes—ontology/profile, manufacturing patterns, authority policy, verifier law—instead of manually inspecting every manufactured artifact.
+
+It is intentionally not empirical evidence about a real company.
+
+Run it:
+
+```bash
+python3 tools/simulate_fortune500.py examples/fortune500-fibo/enterprise.json
+```
+
+## Full process intelligence
+
+Artifact correctness is insufficient. Consequential activity must emit comparable object-centric and provenance evidence so the enterprise can analyze conformance, variants, bottlenecks, authority exceptions, rework, failure propagation, economic performance, and **process fitness**.
+
+A perfectly conformant unsafe process is still unsafe.
+
+## Governance compression
+
+“Validate once” means **admit a bounded, versioned law once**, not approve it forever.
+
+A board or delegated authority can validate classes of semantic source, contract law, manufacturing patterns, authority policy, verifier/metrology law, and risk bounds. Each manufactured consequence still proves derivation and is automatically qualified. A material source-law change creates a new decision boundary and requires new admission.
+
+Governance therefore moves upstream without disappearing.
+
+## Software manufacturing as capital
+
+The factory accumulates reusable capability: ontology profiles, contracts, templates, jigs, generator compositions, verifiers, authority policies, process mappings, and reconstitution knowledge.
+
+Code that can be reproduced from those sources increasingly behaves like **inventory**. The durable asset is the knowledge required to remanufacture it.
+
+The goal is maximum **qualified manufacture**, not minimum files, minimum commits, or meaningless volume.
+
+## Adversarial pressure is part of the design method
+
+Resistance and criticism are not merely adoption friction. A critic with a different loss function can discover failure states the constructor never searched.
+
+```text
+objection -> candidate falsifier -> explicit failure state -> evidence -> new requirement or admitted limit
+```
+
+Liability, authority attribution, long-horizon reconstruction, unsafe-but-conformant processes, artifact-scale governance, replay, and model/session disappearance are architecture requirements once evidence admits them.
+
+## Standing and claim discipline
+
+APS uses:
+
+`ALIVE | PARTIAL_ALIVE | BLOCKED | BUILD_BROKEN | UNKNOWN | UNSUPPORTED | REFUSED`
+
+The repository verifier can earn `ALIVE` for **repository coherence**. That does not prove the long-horizon crown hypothesis that hand-authored enterprise code can cease to be the durable carrier of enterprise knowledge.
+
+The crown remains an explicit falsifiable research program.
+
+## Verify everything
+
+```bash
+make all
+```
+
+or individually:
+
+```bash
+python3 tools/verify.py --no-receipt
+python3 -m unittest discover -s tests -v
+mdbook build -d /tmp/aps-book specification-guide
+python3 tools/simulate_fortune500.py examples/fortune500-fibo/enterprise.json
+```
+
+Promotion evidence must bind to the exact candidate head.
+
+## Archive law
+
+The predecessor Markdown corpus is preserved under `archive/pre-v26.8.24/`. Other predecessor code, generated artifacts, workflows, and receipts remain exactly recoverable from the immutable predecessor commit recorded in `MANIFEST.json`.
+
+Archive material is evidence, never current authority without explicit re-admission.

@@ -1,0 +1,37 @@
+@prefix aps: <https://w3id.org/chatman/aps#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dqv: <http://www.w3.org/ns/dqv#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://w3id.org/chatman/aps> a owl:Ontology ;
+  dcterms:title "Agile Protocol Specification v26.8.24 core profile" ;
+  dcterms:description "A public-ontology-first profile for knowledge-work reconstitution, manufacture, authority, evidence, and standing." .
+
+aps:AdmittedKnowledge a owl:Class ; rdfs:subClassOf prov:Entity ; skos:definition "Bounded knowledge admitted as manufacturing authority at a declared coordinate." .
+aps:Contract a owl:Class ; rdfs:subClassOf prov:Entity ; skos:definition "Executable precondition, postcondition, invariant, refusal, authority, and evidence law." .
+aps:ManufacturingStrategy a owl:Class ; rdfs:subClassOf prov:Plan ; skos:definition "Candidate method for manufacturing consequences from admitted knowledge." .
+aps:CandidateFalsifier a owl:Class ; rdfs:subClassOf prov:Entity ; skos:definition "Explicit adversarial condition capable of refuting a bounded claim." .
+aps:ActuationIntent a owl:Class ; rdfs:subClassOf prov:Plan ; skos:definition "Authorized proposal for consequential DO; existence alone confers no authority." .
+aps:EvidenceReceipt a owl:Class ; rdfs:subClassOf prov:Entity ; skos:definition "Integrity-bound observation of requested and observed consequence at a coordinate." .
+aps:StandingAssertion a owl:Class ; rdfs:subClassOf dqv:QualityMeasurement ; skos:definition "Bounded evidentiary standing assigned by a declared verifier." .
+aps:Reconstitution a owl:Class ; rdfs:subClassOf prov:Activity ; skos:definition "Observation, admission, construction, qualification, selection, and sunset transition from predecessor evidence to successor standing." .
+
+aps:derivedFromKnowledge a owl:ObjectProperty ; rdfs:subPropertyOf prov:wasDerivedFrom .
+aps:governedByContract a owl:ObjectProperty ; rdfs:range aps:Contract .
+aps:hasCandidateFalsifier a owl:ObjectProperty ; rdfs:range aps:CandidateFalsifier .
+aps:producedReceipt a owl:ObjectProperty ; rdfs:subPropertyOf prov:generated ; rdfs:range aps:EvidenceReceipt .
+aps:requiresPolicy a owl:ObjectProperty ; rdfs:range odrl:Policy .
+aps:validatedByShape a owl:ObjectProperty ; rdfs:range sh:Shape .
+
+aps:ALIVE a skos:Concept ; skos:prefLabel "ALIVE" .
+aps:PARTIAL_ALIVE a skos:Concept ; skos:prefLabel "PARTIAL_ALIVE" .
+aps:BLOCKED a skos:Concept ; skos:prefLabel "BLOCKED" .
+aps:BUILD_BROKEN a skos:Concept ; skos:prefLabel "BUILD_BROKEN" .
+aps:UNKNOWN a skos:Concept ; skos:prefLabel "UNKNOWN" .
+aps:UNSUPPORTED a skos:Concept ; skos:prefLabel "UNSUPPORTED" .
+aps:REFUSED a skos:Concept ; skos:prefLabel "REFUSED" .

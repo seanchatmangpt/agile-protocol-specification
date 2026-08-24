@@ -1,0 +1,34 @@
+{
+  "reconstitutionId": "aps:synthetic-f500:reconstitution-001",
+  "predecessor": {"coordinate": "synthetic:incumbent-estate:v1", "standing": "UNKNOWN"},
+  "observations": [
+    "recover external behavior and contractual obligations",
+    "inventory internal and SaaS bindings by semantic subject",
+    "recover deployment, security, data, and process evidence obligations"
+  ],
+  "admittedKnowledge": [
+    "FIBO business-entity semantics",
+    "enterprise-specific facts",
+    "operational contract constraints",
+    "authority and verifier policy"
+  ],
+  "contractRefs": ["aps:synthetic-f500:business-entity-capability"],
+  "candidateStrategies": [
+    {"strategyId":"direct-manufacture","manufacturingLaw":"public semantics -> contract -> ggen-like direct projections","reversible":true},
+    {"strategyId":"downstream-generator","manufacturingLaw":"public semantics -> manufactured generator declarations/invocation -> specialized generator","reversible":true},
+    {"strategyId":"external-binding","manufacturingLaw":"public semantics -> manufactured adapter/binding contract -> incumbent SaaS or executable","reversible":true}
+  ],
+  "candidateFalsifiers": [
+    "hidden incumbent behavior cannot be recovered",
+    "semantic-operational round trip changes identity/cardinality",
+    "governance cost grows linearly with artifact count",
+    "process evidence cannot reconstruct authority and consequence"
+  ],
+  "selectedStrategy": null,
+  "sunsetCriteria": [
+    "successor contract coverage is admitted",
+    "required equivalence or improvement evidence exists",
+    "migration/coexistence obligations are satisfied",
+    "prospective sunset risk is within admitted bounds"
+  ]
+}

@@ -1,0 +1,18 @@
+@prefix aps: <https://w3id.org/chatman/aps#> .
+@prefix ex: <https://w3id.org/chatman/aps/example/fortune500#> .
+@prefix fibo-be-le-lp: <https://spec.edmcouncil.org/fibo/ontology/BE/LegalEntities/LegalPersons/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<https://w3id.org/chatman/aps/example/fortune500> a owl:Ontology ;
+  dcterms:title "Synthetic Fortune-500 FIBO profile for APS sensitivity experiments" ;
+  dcterms:description "Illustrative profile only; it is not a model of any real company." ;
+  owl:imports <https://spec.edmcouncil.org/fibo/ontology/master/latest/BE/LegalEntities/LegalPersons/> .
+
+ex:SyntheticEnterprise a fibo-be-le-lp:BusinessEntity, prov:Entity ;
+  dcterms:title "Synthetic FIBO Fortune-500 Enterprise" ;
+  dcterms:description "A synthetic business entity used to test manufacturing scale, governance compression, process evidence, and reconstitution contracts." .
+
+ex:EnterpriseKnowledge a aps:AdmittedKnowledge ;
+  prov:specializationOf ex:SyntheticEnterprise .
