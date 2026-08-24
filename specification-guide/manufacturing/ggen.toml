@@ -1,0 +1,11 @@
+[project]
+name = "aps-v26.8.24-mdbook"
+
+[ontology]
+source = "docs/book.ttl"
+
+[packs]
+"mdbook-pattern-language-pack" = { path = "packs/mdbook-pattern-language-pack" }
+
+[templates]
+dir = "templates"

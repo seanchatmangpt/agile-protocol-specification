@@ -1,0 +1,21 @@
+{
+  "schema": "aps.ggen-ecosystem-lock.v26.8.24",
+  "ggen": {
+    "version": "26.8.21",
+    "commit": "f4e1bce1efdcdc4f6c2531be9f66070950f7ec93",
+    "releaseTag": "v26.8.21",
+    "asset": "ggen-x86_64-unknown-linux-gnu.tar.gz",
+    "assetSha256": "17c1c36d8b021052e2a482f191a3e32fb24fa088c7a824a16a9c0ce8e10595a4"
+  },
+  "marketplace": {
+    "commit": "0a3d7b7df9d7053070417864ef11a3953b5e6aab",
+    "pack": "mdbook-pattern-language-pack",
+    "packVersion": "0.1.0",
+    "blobs": {
+      "pack.toml": "87af566fcb20a3590f96b67ea0fa612d0c4b2316",
+      "ontology.ttl": "20bf77b48ac48f2364c0c0980089661703a49079",
+      "templates/SUMMARY.md.tmpl": "c8e528e0130db20b39cc28ca4daaa265ba90bb08",
+      "templates/book.toml.tmpl": "b6db92ca59c35a781797bc12468795530b272c4e"
+    }
+  }
+}
