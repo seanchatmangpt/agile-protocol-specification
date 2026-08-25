@@ -1,0 +1,11 @@
+[project]
+name = "aps-v26.8.24-standing-ladder"
+
+[ontology]
+source = "ontology.ttl"
+
+[packs]
+"standing-ladder-pack" = { path = "packs/standing-ladder-pack" }
+
+[templates]
+dir = "templates"

@@ -1,0 +1,102 @@
+@prefix cci: <https://ggen.dev/consequence-ir#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix apsm: <https://seanchatmangpt.github.io/agile-protocol-specification/manufacturing#> .
+
+apsm:Pr8ObservedRun a cci:Observation ;
+  dcterms:description "Observed exact-head CI evidence from the already-qualified APS ggen mdBook manufacturing cell." .
+
+apsm:Pr8AdmittedRun a cci:AdmittedObservation ;
+  cci:admittedFrom apsm:Pr8ObservedRun .
+
+apsm:GgenMdbookManufacture a cci:Capability ;
+  dcterms:description "Deterministically manufacture the APS mdBook control surface from admitted RDF using the pinned marketplace pack." .
+
+apsm:GitHubActionsRunner a prov:Agent .
+apsm:CandidateWorkspace a prov:Entity ;
+  dcterms:description "Ephemeral GitHub Actions workspace for one exact APS candidate head." .
+apsm:CandidateRepository a prov:Entity .
+apsm:ExactHeadPolicy a cci:Policy ;
+  dcterms:description "Consequential writes are bounded to the staged CI consumer; no production resource authority is granted." .
+apsm:Pr8QualificationEvidence a prov:Entity ;
+  dcterms:identifier "APS PR #8 exact-head and post-merge qualification" .
+
+apsm:CiManufactureGrant a cci:AuthorityGrant ;
+  cci:authorityPrincipal apsm:GitHubActionsRunner ;
+  cci:authorityAction apsm:GgenMdbookManufacture ;
+  cci:authoritySubject apsm:CandidateRepository ;
+  cci:authorityScope apsm:CandidateWorkspace ;
+  cci:authorityPolicy apsm:ExactHeadPolicy ;
+  cci:authorityEvidence apsm:Pr8QualificationEvidence .
+
+apsm:ManufactureIntent a cci:Intent ;
+  dcterms:description "Manufacture APS mdBook projections from the admitted book graph at the exact candidate head." .
+
+apsm:ManufactureHook a cci:KnowledgeHook ;
+  cci:hasPhase cci:SELECT ;
+  cci:evaluatesEvidence apsm:Pr8AdmittedRun ;
+  cci:manufacturesIntent apsm:ManufactureIntent .
+
+apsm:ManufacturedSummary a cci:Artifact ;
+  dcterms:identifier "specification-guide/src/SUMMARY.md" .
+apsm:ManufacturedSummaryObserved a cci:ObservedConsequence ;
+  dcterms:description "ggen emitted a SUMMARY.md projection and the court compared it byte-for-byte with committed inventory." .
+apsm:ManufacturedSummaryVerified a cci:Verification ;
+  dcterms:description "Independent exact-head workflow required ggen receipt verification and byte-identical second manufacture." .
+
+apsm:CiManufactureExecution a cci:Execution ;
+  cci:hasPhase cci:DO ;
+  cci:usesArtifact apsm:ManufacturedSummary ;
+  cci:executesIntent apsm:ManufactureIntent ;
+  cci:requiresAuthority apsm:CiManufactureGrant ;
+  cci:hasReversibility cci:REVERSIBLE ;
+  cci:observesConsequence apsm:ManufacturedSummaryObserved ;
+  cci:verifiedBy apsm:ManufacturedSummaryVerified ;
+  cci:hasReceipt apsm:CiManufactureReceipt .
+
+apsm:CiManufactureReceipt a cci:Receipt ;
+  cci:bindsSubject apsm:ManufacturedSummary ;
+  cci:bindsActivity apsm:CiManufactureExecution ;
+  cci:bindsIntent apsm:ManufactureIntent ;
+  cci:bindsConsequence apsm:ManufacturedSummaryObserved ;
+  cci:bindsVerification apsm:ManufacturedSummaryVerified ;
+  cci:standing cci:ALIVE ;
+  cci:standingCeiling cci:ALIVE ;
+  cci:digest "evidence:pr8-exact-head-manufacture" .
+
+apsm:ReplayObserved a cci:ObservedConsequence ;
+  dcterms:description "Second manufacture reproduced the qualified projection byte-for-byte." .
+apsm:ReplayVerified a cci:Verification ;
+  dcterms:description "The workflow executed cmp over first and second manufactured projections and verified the second ggen receipt." .
+
+apsm:CiReplayExecution a cci:Execution ;
+  cci:hasPhase cci:DO ;
+  cci:usesArtifact apsm:ManufacturedSummary ;
+  cci:executesIntent apsm:ManufactureIntent ;
+  cci:requiresAuthority apsm:CiManufactureGrant ;
+  cci:hasReversibility cci:REVERSIBLE ;
+  cci:replayOf apsm:CiManufactureReceipt ;
+  cci:observesConsequence apsm:ReplayObserved ;
+  cci:verifiedBy apsm:ReplayVerified ;
+  cci:hasReceipt apsm:CiReplayReceipt .
+
+apsm:CiReplayReceipt a cci:Receipt ;
+  cci:bindsSubject apsm:ManufacturedSummary ;
+  cci:bindsActivity apsm:CiReplayExecution ;
+  cci:bindsIntent apsm:ManufactureIntent ;
+  cci:bindsConsequence apsm:ReplayObserved ;
+  cci:bindsVerification apsm:ReplayVerified ;
+  cci:parentReceipt apsm:CiManufactureReceipt ;
+  cci:standing cci:ALIVE ;
+  cci:standingCeiling cci:ALIVE ;
+  cci:digest "evidence:pr8-byte-identical-replay" .
+
+apsm:ReplayDivergenceFalsifier a cci:Falsifier ;
+  dcterms:description "Same admitted graph and exact toolchain produce a non-equivalent projection or unverifiable receipt." .
+apsm:ReusableMdbookCell a cci:Artifact .
+
+apsm:MdbookManufacturingPromotion a cci:Promotion ;
+  cci:promotesCapability apsm:GgenMdbookManufacture ;
+  cci:promotionEvidence apsm:CiManufactureReceipt, apsm:CiReplayReceipt ;
+  cci:promotionFalsifier apsm:ReplayDivergenceFalsifier ;
+  cci:promotedArtifact apsm:ReusableMdbookCell .

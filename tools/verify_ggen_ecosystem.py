@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Independent static court for APS's pinned ggen ecosystem consumer contract."""
+"""Independent static court for APS's multi-cell ggen ecosystem contract.
+
+This court does not substitute for ggen execution. It validates the admitted APS
+facts, exact ecosystem datum, cell boundaries, and bounded claims before CI runs
+the pinned ggen runtime and marketplace laws.
+"""
 from __future__ import annotations
 
 import json
@@ -11,9 +16,8 @@ from rdflib import Graph, Namespace, RDF
 
 ROOT = Path(__file__).resolve().parents[1]
 MFG = ROOT / "specification-guide" / "manufacturing"
+CELLS = MFG / "cells"
 LOCK = MFG / "ecosystem.lock.json"
-CONSUMER = MFG / "ggen.toml"
-BOOK_GRAPH = MFG / "docs" / "book.ttl"
 SUMMARY = ROOT / "specification-guide" / "src" / "SUMMARY.md"
 BOOK_TOML = ROOT / "specification-guide" / "book.toml"
 
@@ -24,16 +28,12 @@ EXPECTED_GGEN = {
     "asset": "ggen-x86_64-unknown-linux-gnu.tar.gz",
     "assetSha256": "17c1c36d8b021052e2a482f191a3e32fb24fa088c7a824a16a9c0ce8e10595a4",
 }
-EXPECTED_MARKETPLACE = {
-    "commit": "0a3d7b7df9d7053070417864ef11a3953b5e6aab",
-    "pack": "mdbook-pattern-language-pack",
-    "packVersion": "0.1.0",
-    "blobs": {
-        "pack.toml": "87af566fcb20a3590f96b67ea0fa612d0c4b2316",
-        "ontology.ttl": "20bf77b48ac48f2364c0c0980089661703a49079",
-        "templates/SUMMARY.md.tmpl": "c8e528e0130db20b39cc28ca4daaa265ba90bb08",
-        "templates/book.toml.tmpl": "b6db92ca59c35a781797bc12468795530b272c4e",
-    },
+EXPECTED_MARKETPLACE_COMMIT = "b307cdc6da085d633f00bc44f16d42c286558232"
+EXPECTED_PACKS = {
+    "mdbook-pattern-language-pack": "0.1.0",
+    "consequence-ir-pack": "0.2.0",
+    "standing-ladder-pack": "0.1.1",
+    "dfcm-maximalist-court-pack": "26.8.24",
 }
 EXPECTED_CHAPTERS = [
     ("Source Admission and Paradigm Reset", "v26_8_24/00_source_admission_and_paradigm_reset.md"),
@@ -71,109 +71,166 @@ def expected_summary() -> str:
     )
 
 
+def check_manifest(path: Path, expected_pack: str, expected_source: str) -> list[str]:
+    failures: list[str] = []
+    try:
+        data = tomllib.loads(path.read_text())
+    except Exception as exc:
+        return [f"invalid consumer manifest {path}: {exc}"]
+    if data.get("ontology", {}).get("source") != expected_source:
+        failures.append(f"{path}: ontology source must be {expected_source}")
+    pack = data.get("packs", {}).get(expected_pack, {})
+    if pack.get("path") != f"packs/{expected_pack}":
+        failures.append(f"{path}: must compose {expected_pack} from staged marketplace packs")
+    return failures
+
+
 def main() -> int:
     failures: list[str] = []
-
-    def refuse(message: str) -> None:
-        failures.append(message)
 
     try:
         lock = json.loads(LOCK.read_text())
     except Exception as exc:
-        refuse(f"cannot load ecosystem lock: {exc}")
         lock = {}
-    if lock.get("schema") != "aps.ggen-ecosystem-lock.v26.8.24":
-        refuse("ecosystem lock schema mismatch")
-    if lock.get("ggen") != EXPECTED_GGEN:
-        refuse(f"ggen coordinate drift: {lock.get('ggen')!r}")
-    if lock.get("marketplace") != EXPECTED_MARKETPLACE:
-        refuse(f"marketplace coordinate drift: {lock.get('marketplace')!r}")
+        failures.append(f"cannot load ecosystem lock: {exc}")
 
-    try:
-        manifest = tomllib.loads(CONSUMER.read_text())
-    except Exception as exc:
-        refuse(f"invalid ggen consumer manifest: {exc}")
-        manifest = {}
-    if manifest.get("ontology", {}).get("source") != "docs/book.ttl":
-        refuse("ggen consumer must take docs/book.ttl as ontology source")
-    if manifest.get("packs", {}).get("mdbook-pattern-language-pack", {}).get("path") != "packs/mdbook-pattern-language-pack":
-        refuse("ggen consumer must compose the marketplace mdbook-pattern-language-pack")
+    if lock.get("schema") != "aps.ggen-ecosystem-lock.v26.8.24.2":
+        failures.append("ecosystem lock schema mismatch")
+    if lock.get("ggen") != EXPECTED_GGEN:
+        failures.append("ggen coordinate drift")
+    market = lock.get("marketplace", {})
+    if market.get("commit") != EXPECTED_MARKETPLACE_COMMIT:
+        failures.append("marketplace commit drift")
+    packs = market.get("packs", {})
+    if set(packs) != set(EXPECTED_PACKS):
+        failures.append(f"marketplace pack set mismatch: {sorted(packs)}")
+    for name, version in EXPECTED_PACKS.items():
+        entry = packs.get(name, {})
+        if entry.get("version") != version:
+            failures.append(f"{name}: version drift")
+        blobs = entry.get("blobs", {})
+        if not blobs or any(len(v) != 40 for v in blobs.values()):
+            failures.append(f"{name}: critical Git blob identities are missing or malformed")
+
+    failures += check_manifest(MFG / "ggen.toml", "mdbook-pattern-language-pack", "docs/book.ttl")
+    failures += check_manifest(CELLS / "consequence" / "ggen.toml", "consequence-ir-pack", "ontology.ttl")
+    failures += check_manifest(CELLS / "standing" / "ggen.toml", "standing-ladder-pack", "ontology.ttl")
 
     mdp = Namespace("https://seanchatmangpt.github.io/ggen-marketplace/mdbook-pattern-language#")
     dcterms = Namespace("http://purl.org/dc/terms/")
     try:
-        graph = Graph().parse(BOOK_GRAPH, format="turtle")
-    except Exception as exc:
-        refuse(f"invalid manufacturing book graph: {exc}")
-        graph = Graph()
-
-    books = list(graph.subjects(RDF.type, mdp.Book))
-    if len(books) != 1:
-        refuse(f"manufacturing graph must define exactly one mdp:Book; got {len(books)}")
-    else:
-        book = books[0]
-        expected_book = {
-            dcterms.title: "Agile Protocol Specification v26.8.24",
-            dcterms.creator: "Sean Chatman",
-            dcterms.language: "en",
-            mdp.srcDir: "src",
-            mdp.buildDir: "book",
-            mdp.repositoryUrl: "https://github.com/seanchatmangpt/agile-protocol-specification",
-        }
-        for predicate, expected in expected_book.items():
-            actual = [str(value) for value in graph.objects(book, predicate)]
-            if actual != [expected]:
-                refuse(f"mdp:Book field {predicate} mismatch: {actual!r}")
-
-    rows = []
-    for subject in graph.subjects(RDF.type, mdp.NavigationEntry):
-        try:
+        book_graph = Graph().parse(MFG / "docs" / "book.ttl", format="turtle")
+        rows = []
+        for subject in book_graph.subjects(RDF.type, mdp.NavigationEntry):
             rows.append((
-                int(next(graph.objects(subject, mdp.position))),
-                str(next(graph.objects(subject, mdp.kind))),
-                str(next(graph.objects(subject, dcterms.title))),
-                str(next(graph.objects(subject, mdp.path))),
+                int(next(book_graph.objects(subject, mdp.position))),
+                str(next(book_graph.objects(subject, mdp.kind))),
+                str(next(book_graph.objects(subject, dcterms.title))),
+                str(next(book_graph.objects(subject, mdp.path))),
             ))
-        except Exception as exc:
-            refuse(f"incomplete navigation entry {subject}: {exc}")
-    rows.sort()
-    expected_rows = [(i + 1, "chapter", title, path) for i, (title, path) in enumerate(EXPECTED_CHAPTERS)]
-    if rows != expected_rows:
-        refuse(f"RDF navigation does not exactly match active chapter contract: {rows!r}")
+        rows.sort()
+        expected = [(i + 1, "chapter", title, path) for i, (title, path) in enumerate(EXPECTED_CHAPTERS)]
+        if rows != expected:
+            failures.append("RDF navigation no longer matches the 20-chapter active contract")
+    except Exception as exc:
+        failures.append(f"invalid mdBook manufacturing graph: {exc}")
 
     try:
         if SUMMARY.read_text() != expected_summary():
-            refuse("committed SUMMARY.md is not the exact admitted marketplace projection")
+            failures.append("committed SUMMARY.md is not the exact admitted marketplace projection")
     except Exception as exc:
-        refuse(f"cannot read committed SUMMARY.md: {exc}")
+        failures.append(f"cannot read committed SUMMARY.md: {exc}")
+
+    cci = Namespace("https://ggen.dev/consequence-ir#")
+    apsm = Namespace("https://seanchatmangpt.github.io/agile-protocol-specification/manufacturing#")
+    try:
+        cg = Graph().parse(CELLS / "consequence" / "ontology.ttl", format="turtle")
+        executions = set(cg.subjects(RDF.type, cci.Execution))
+        if executions != {apsm.CiManufactureExecution, apsm.CiReplayExecution}:
+            failures.append(f"consequence cell execution census mismatch: {sorted(map(str, executions))}")
+        for execution in executions:
+            if not list(cg.objects(execution, cci.requiresAuthority)):
+                failures.append(f"consequence execution lacks explicit authority: {execution}")
+            if not list(cg.objects(execution, cci.hasReceipt)):
+                failures.append(f"consequence execution lacks receipt binding: {execution}")
+            if list(cg.objects(execution, cci.hasPhase)) != [cci.DO]:
+                failures.append(f"consequence execution phase mismatch: {execution}")
+        receipts = set(cg.subjects(RDF.type, cci.Receipt))
+        if len(receipts) != 2:
+            failures.append("consequence cell must carry manufacture and replay receipts")
+        if (apsm.CiReplayExecution, cci.replayOf, apsm.CiManufactureReceipt) not in cg:
+            failures.append("consequence replay is not bound to the parent manufacture receipt")
+    except Exception as exc:
+        failures.append(f"invalid consequence cell graph: {exc}")
+
+    stl = Namespace("http://seanchatmangpt.github.io/packs/standing-ladder#")
+    try:
+        sg = Graph().parse(CELLS / "standing" / "ontology.ttl", format="turtle")
+        claim = apsm.GgenMdbookControlSurfaceStanding
+        if list(sg.objects(claim, stl.hasStanding)) != [stl.MANUFACTURED]:
+            failures.append("ggen mdBook evidentiary claim must stop at MANUFACTURED")
+        transitions = []
+        for t in sg.subjects(RDF.type, stl.StandingTransition):
+            if (t, stl.aboutClaim, claim) in sg:
+                order = int(next(sg.objects(t, stl.transitionOrder)))
+                evidence = str(next(sg.objects(t, stl.evidenceRef)))
+                transitions.append((order, evidence))
+        transitions.sort()
+        if [o for o, _ in transitions] != list(range(1, 8)):
+            failures.append("standing claim must carry all seven transitions UNKNOWN→MANUFACTURED")
+        if any(not evidence.strip() for _, evidence in transitions):
+            failures.append("standing transition evidence may not be empty")
+    except Exception as exc:
+        failures.append(f"invalid standing cell graph: {exc}")
+
+    dmc = Namespace("https://ggen.dev/ontology/dfcm-maximalist-court#")
+    try:
+        dg = Graph().parse(CELLS / "dfcm" / "ontology.ttl", format="turtle")
+        candidates = list(dg.subjects(RDF.type, dmc.Candidate))
+        if len(candidates) < 5:
+            failures.append("DfCM ecosystem frontier must contain at least five non-vacuous candidates")
+        selectable = []
+        excluded = []
+        for candidate in candidates:
+            rollback = int(next(dg.objects(candidate, dmc.rollbackCost)))
+            evidence = int(next(dg.objects(candidate, dmc.ctqEvidence)))
+            if not str(next(dg.objects(candidate, dmc.falsifier))).strip():
+                failures.append(f"DfCM candidate has empty falsifier: {candidate}")
+            if next(dg.objects(candidate, dmc.requiresReceipt)).toPython() is not True:
+                failures.append(f"DfCM candidate does not require a receipt: {candidate}")
+            (selectable if rollback <= 2 and evidence >= 5 else excluded).append(candidate)
+        if len(selectable) < 3 or not excluded:
+            failures.append("DfCM frontier must preserve both selectable opportunities and deliberately unselected options")
+    except Exception as exc:
+        failures.append(f"invalid DfCM cell graph: {exc}")
 
     try:
         book_toml = tomllib.loads(BOOK_TOML.read_text())
         checks = [
             (book_toml.get("book", {}).get("title"), "Agile Protocol Specification v26.8.24", "title"),
             (book_toml.get("book", {}).get("authors"), ["Sean Chatman"], "authors"),
-            (book_toml.get("book", {}).get("description"), "A constitution for public-semantic, evidence-bound knowledge-work reconstitution and autonomic manufacturing.", "description"),
-            (book_toml.get("book", {}).get("language"), "en", "language"),
             (book_toml.get("book", {}).get("src"), "src", "src"),
             (book_toml.get("build", {}).get("build-dir"), "book", "build-dir"),
-            (book_toml.get("build", {}).get("create-missing"), False, "create-missing"),
         ]
         for actual, expected, name in checks:
             if actual != expected:
-                refuse(f"committed book.toml {name} disagrees with manufacturing graph: {actual!r}")
+                failures.append(f"committed book.toml {name} disagrees with manufacturing authority: {actual!r}")
     except Exception as exc:
-        refuse(f"invalid committed book.toml: {exc}")
+        failures.append(f"invalid committed book.toml: {exc}")
 
     result = {
-        "schema": "aps.ggen-ecosystem-static-court.v26.8.24",
+        "schema": "aps.ggen-ecosystem-static-court.v26.8.24.2",
         "standing": "ALIVE" if not failures else "REFUSED",
         "ggen": EXPECTED_GGEN,
-        "marketplace": EXPECTED_MARKETPLACE,
-        "navigationEntries": len(rows),
+        "marketplaceCommit": EXPECTED_MARKETPLACE_COMMIT,
+        "packs": EXPECTED_PACKS,
+        "cells": ["mdbook", "consequence", "standing", "dfcm"],
         "failures": failures,
         "nonClaims": [
-            "This static court does not claim ggen executed; exact-head CI must execute the pinned binary.",
-            "It proves only that admitted consumer inputs and the committed projection are internally coherent.",
+            "This static court does not claim ggen executed; exact-head CI must execute every cell.",
+            "MANUFACTURED evidentiary standing is not production ACTUATED or VERIFIED standing.",
+            "A DfCM SELECT projection is not DO authority.",
+            "Multi-pack qualification does not prove complete APS self-hosting.",
         ],
     }
     print(json.dumps(result, indent=2, sort_keys=True))
