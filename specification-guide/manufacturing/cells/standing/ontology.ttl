@@ -1,0 +1,50 @@
+@prefix stl: <http://seanchatmangpt.github.io/packs/standing-ladder#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix apsm: <https://seanchatmangpt.github.io/agile-protocol-specification/manufacturing#> .
+
+apsm:ManufacturingCapability a rdfs:Class .
+
+apsm:GgenMdbookControlSurface a apsm:ManufacturingCapability ;
+  dcterms:description "APS mdBook identity and navigation are manufactured from APS RDF by the pinned ggen runtime using mdbook-pattern-language-pack." ;
+  dcterms:source "APS PR #8 and main workflow run 32789427001" .
+
+apsm:GgenMdbookControlSurfaceStanding a stl:StandingClaim ;
+  stl:aboutFact apsm:GgenMdbookControlSurface ;
+  stl:hasStanding stl:MANUFACTURED ;
+  dcterms:description "Evidentiary standing for the bounded claim that the APS mdBook control surface is manufactured by ggen. MANUFACTURED is the ceiling: this fact does not claim production ACTUATED or VERIFIED standing." .
+
+apsm:StandingT1 a stl:StandingTransition ;
+  stl:aboutClaim apsm:GgenMdbookControlSurfaceStanding ;
+  stl:fromState stl:UNKNOWN ; stl:toState stl:OBSERVED ; stl:transitionOrder 1 ;
+  stl:evidenceRef "OBSERVED: APS source inspection identified authored mdBook navigation as a ggen-first contradiction and identified mdbook-pattern-language-pack as existing marketplace capital." .
+
+apsm:StandingT2 a stl:StandingTransition ;
+  stl:aboutClaim apsm:GgenMdbookControlSurfaceStanding ;
+  stl:fromState stl:OBSERVED ; stl:toState stl:VALIDATED ; stl:transitionOrder 2 ;
+  stl:evidenceRef "VALIDATED: the exact ggen release digest, marketplace commit, and pack Git blobs were resolved and checked before execution." .
+
+apsm:StandingT3 a stl:StandingTransition ;
+  stl:aboutClaim apsm:GgenMdbookControlSurfaceStanding ;
+  stl:fromState stl:VALIDATED ; stl:toState stl:DERIVED ; stl:transitionOrder 3 ;
+  stl:evidenceRef "DERIVED: APS book identity and all 20 ordered navigation entries were represented as RDF facts in specification-guide/manufacturing/docs/book.ttl." .
+
+apsm:StandingT4 a stl:StandingTransition ;
+  stl:aboutClaim apsm:GgenMdbookControlSurfaceStanding ;
+  stl:fromState stl:DERIVED ; stl:toState stl:CANDIDATE ; stl:transitionOrder 4 ;
+  stl:evidenceRef "CANDIDATE: the RDF-plus-marketplace-pack path was promoted into PR #8 as the candidate replacement for hand-maintained navigation." .
+
+apsm:StandingT5 a stl:StandingTransition ;
+  stl:aboutClaim apsm:GgenMdbookControlSurfaceStanding ;
+  stl:fromState stl:CANDIDATE ; stl:toState stl:EXPERIMENTALLY_SUPPORTED ; stl:transitionOrder 5 ;
+  stl:evidenceRef "EXPERIMENTALLY_SUPPORTED: exact-head CI executed the pinned ggen binary, verified signed receipts, and reproduced byte-identical output on the second manufacture." .
+
+apsm:StandingT6 a stl:StandingTransition ;
+  stl:aboutClaim apsm:GgenMdbookControlSurfaceStanding ;
+  stl:fromState stl:EXPERIMENTALLY_SUPPORTED ; stl:toState stl:ADMITTED ; stl:transitionOrder 6 ;
+  stl:evidenceRef "ADMITTED: PR #8 exact head ecf648c799dd3ed4f09a971c146fb4bacaa186f9 passed the whole-repository and ggen manufacturing courts and was merge-guarded to that exact head." .
+
+apsm:StandingT7 a stl:StandingTransition ;
+  stl:aboutClaim apsm:GgenMdbookControlSurfaceStanding ;
+  stl:fromState stl:ADMITTED ; stl:toState stl:MANUFACTURED ; stl:transitionOrder 7 ;
+  stl:evidenceRef "MANUFACTURED: default-branch merge commit 65e982ea54aeca0bc8b6a064fdc773a617d18068 reran the real ggen manufacture and completed workflow run 32789427001 successfully." .
