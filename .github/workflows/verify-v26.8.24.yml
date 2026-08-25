@@ -44,7 +44,7 @@ jobs:
           set -euo pipefail
           python3 -m pip install --disable-pip-version-check -r tools/requirements-ci.txt
 
-      - name: Qualify whole repository and ggen consumer contract
+      - name: Qualify whole repository and multi-cell ggen contract
         shell: bash
         run: |
           set -euo pipefail
@@ -68,7 +68,6 @@ jobs:
           print(f"GGEN_ASSET={g['asset']}")
           print(f"GGEN_ASSET_SHA256={g['assetSha256']}")
           print(f"GGEN_MARKETPLACE_COMMIT={m['commit']}")
-          print(f"GGEN_MARKETPLACE_PACK={m['pack']}")
           PY
 
       - name: Resolve and verify exact ggen ecosystem
@@ -99,36 +98,46 @@ jobs:
           test "$(git -C "$market_dir" rev-parse HEAD)" = "$GGEN_MARKETPLACE_COMMIT"
           echo "GGEN_MARKETPLACE_ROOT=$market_dir" >> "$GITHUB_ENV"
 
-          python3 - <<'PY' > /tmp/aps-expected-pack-blobs.txt
+          python3 - <<'PY' > /tmp/aps-expected-pack-blobs.tsv
           import json
           from pathlib import Path
           lock = json.loads(Path('specification-guide/manufacturing/ecosystem.lock.json').read_text())
-          for path, sha in lock['marketplace']['blobs'].items():
-              print(sha, path)
+          for pack, meta in sorted(lock['marketplace']['packs'].items()):
+              for path, sha in sorted(meta['blobs'].items()):
+                  print(pack, sha, path, sep='\t')
           PY
-          while read -r expected path; do
-            actual="$(git -C "$market_dir" hash-object "packs/$GGEN_MARKETPLACE_PACK/$path")"
+          while IFS=$'\t' read -r pack expected path; do
+            actual="$(git -C "$market_dir" hash-object "packs/$pack/$path")"
             test "$actual" = "$expected"
-          done < /tmp/aps-expected-pack-blobs.txt
+          done < /tmp/aps-expected-pack-blobs.tsv
 
-      - name: Manufacture APS mdBook control surface with ggen marketplace
+          python3 - <<'PY'
+          import json, tomllib
+          from pathlib import Path
+          lock = json.loads(Path('specification-guide/manufacturing/ecosystem.lock.json').read_text())
+          root = Path(__import__('os').environ['GGEN_MARKETPLACE_ROOT']) / 'packs'
+          for name, meta in lock['marketplace']['packs'].items():
+              actual = tomllib.loads((root / name / 'pack.toml').read_text())['pack']['version']
+              assert actual == meta['version'], (name, actual, meta['version'])
+          PY
+
+      - name: Manufacture APS mdBook control surface
         shell: bash
         run: |
           set -euo pipefail
-          consumer="$RUNNER_TEMP/aps-ggen-consumer"
-          evidence="/tmp/aps-ggen-evidence"
+          consumer="$RUNNER_TEMP/aps-ggen-mdbook"
+          evidence="/tmp/aps-ggen-evidence/mdbook"
           rm -rf "$consumer" "$evidence"
           mkdir -p "$consumer" "$evidence"
           cp -R specification-guide/manufacturing/. "$consumer/"
           mkdir -p "$consumer/packs" "$consumer/templates"
-          cp -R "$GGEN_MARKETPLACE_ROOT/packs/$GGEN_MARKETPLACE_PACK" "$consumer/packs/"
+          cp -R "$GGEN_MARKETPLACE_ROOT/packs/mdbook-pattern-language-pack" "$consumer/packs/"
 
           cd "$consumer"
           "$GGEN_BIN" sync run
           cp docs/SUMMARY.md "$evidence/SUMMARY.pass1.md"
           cp book.toml "$evidence/book.pass1.toml"
           "$GGEN_BIN" receipt verify | tee "$evidence/receipt-verify-pass1.txt"
-
           "$GGEN_BIN" sync run
           "$GGEN_BIN" receipt verify | tee "$evidence/receipt-verify-pass2.txt"
           cmp "$evidence/SUMMARY.pass1.md" docs/SUMMARY.md
@@ -136,53 +145,130 @@ jobs:
           cmp docs/SUMMARY.md "$GITHUB_WORKSPACE/specification-guide/src/SUMMARY.md"
 
           python3 - <<'PY'
-          import tomllib
+          import os, tomllib
           from pathlib import Path
           generated = tomllib.loads(Path('book.toml').read_text())
-          committed = tomllib.loads((Path.cwd().parents[1] / 'work' / 'agile-protocol-specification' / 'agile-protocol-specification' / 'specification-guide' / 'book.toml').read_text()) if False else tomllib.loads(Path(__import__('os').environ['GITHUB_WORKSPACE'], 'specification-guide', 'book.toml').read_text())
-          checks = [
-              (generated['book']['title'], committed['book']['title'], 'title'),
-              (generated['book']['authors'], committed['book']['authors'], 'authors'),
-              (generated['book']['description'], committed['book']['description'], 'description'),
-              (generated['book']['language'], committed['book']['language'], 'language'),
-              (generated['book']['src'], committed['book']['src'], 'src'),
-              (generated['build']['build-dir'], committed['build']['build-dir'], 'build-dir'),
-              (generated['build']['create-missing'], committed['build']['create-missing'], 'create-missing'),
-          ]
-          for actual, expected, name in checks:
-              assert actual == expected, (name, actual, expected)
+          committed = tomllib.loads(Path(os.environ['GITHUB_WORKSPACE'], 'specification-guide', 'book.toml').read_text())
+          for key in ('title', 'authors', 'description', 'language', 'src'):
+              assert generated['book'][key] == committed['book'][key], key
+          for key in ('build-dir', 'create-missing'):
+              assert generated['build'][key] == committed['build'][key], key
           PY
-
           cp docs/SUMMARY.md "$evidence/SUMMARY.manufactured.md"
           cp book.toml "$evidence/book.manufactured.toml"
-          cp /tmp/aps-ggen-version.txt "$evidence/ggen-version.txt"
-          python3 - <<'PY' > "$evidence/manufacture.json"
+
+      - name: Manufacture consequence and evidentiary-standing cells
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence_root="/tmp/aps-ggen-evidence/cells"
+          mkdir -p "$evidence_root"
+
+          manufacture_pack_cell() {
+            cell="$1"
+            pack="$2"
+            output="$3"
+            consumer="$RUNNER_TEMP/aps-ggen-$cell"
+            evidence="$evidence_root/$cell"
+            rm -rf "$consumer" "$evidence"
+            mkdir -p "$consumer" "$consumer/packs" "$consumer/templates" "$evidence"
+            cp -R "$GITHUB_WORKSPACE/specification-guide/manufacturing/cells/$cell/." "$consumer/"
+            cp -R "$GGEN_MARKETPLACE_ROOT/packs/$pack" "$consumer/packs/"
+            cd "$consumer"
+            "$GGEN_BIN" sync run
+            test -s "$output"
+            mkdir -p "$evidence/pass1/$(dirname "$output")"
+            cp "$output" "$evidence/pass1/$output"
+            "$GGEN_BIN" receipt verify | tee "$evidence/receipt-verify-pass1.txt"
+            "$GGEN_BIN" sync run
+            "$GGEN_BIN" receipt verify | tee "$evidence/receipt-verify-pass2.txt"
+            cmp "$evidence/pass1/$output" "$output"
+            mkdir -p "$evidence/manufactured/$(dirname "$output")"
+            cp "$output" "$evidence/manufactured/$output"
+          }
+
+          manufacture_pack_cell consequence consequence-ir-pack docs/CONSEQUENCE_IR_ADMITTED.md
+          manufacture_pack_cell standing standing-ladder-pack docs/standing-ladder/audit-trail.md
+
+      - name: Manufacture APS DfCM maximalist option court
+        shell: bash
+        run: |
+          set -euo pipefail
+          consumer="$RUNNER_TEMP/aps-ggen-dfcm"
+          evidence="/tmp/aps-ggen-evidence/cells/dfcm"
+          rm -rf "$consumer" "$evidence"
+          mkdir -p "$consumer" "$evidence/pass1" "$evidence/manufactured"
+          cp -R "$GGEN_MARKETPLACE_ROOT/packs/dfcm-maximalist-court-pack/." "$consumer/"
+          cp "$GITHUB_WORKSPACE/specification-guide/manufacturing/cells/dfcm/ontology.ttl" "$consumer/ontology.ttl"
+          rm -rf "$consumer/consumer/dfcm-court"
+
+          cd "$consumer"
+          "$GGEN_BIN" sync run
+          "$GGEN_BIN" receipt verify | tee "$evidence/receipt-verify-pass1.txt"
+          for file in candidates.json qualification.json select.json; do
+            test -s "consumer/dfcm-court/$file"
+            cp "consumer/dfcm-court/$file" "$evidence/pass1/$file"
+          done
+
+          "$GGEN_BIN" sync run
+          "$GGEN_BIN" receipt verify | tee "$evidence/receipt-verify-pass2.txt"
+          for file in candidates.json qualification.json select.json; do
+            cmp "$evidence/pass1/$file" "consumer/dfcm-court/$file"
+            cp "consumer/dfcm-court/$file" "$evidence/manufactured/$file"
+          done
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('consumer/dfcm-court')
+          candidates = json.loads((root / 'candidates.json').read_text())
+          qualification = json.loads((root / 'qualification.json').read_text())
+          selection = json.loads((root / 'select.json').read_text())
+          def rows(value):
+              if isinstance(value, list): return value
+              if isinstance(value, dict):
+                  for key in ('candidates', 'rows', 'items', 'qualification', 'select'):
+                      if isinstance(value.get(key), list): return value[key]
+              raise AssertionError(f'unrecognized generated court shape: {type(value)} {value!r}')
+          assert len(rows(candidates)) == 5, candidates
+          assert len(rows(qualification)) == 5, qualification
+          assert 3 <= len(rows(selection)) < 5, selection
+          PY
+
+      - name: Write multi-cell manufacture evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp /tmp/aps-ggen-version.txt /tmp/aps-ggen-evidence/ggen-version.txt
+          python3 - <<'PY' > /tmp/aps-ggen-evidence/manufacture.json
           import hashlib, json, os
           from pathlib import Path
-          root = Path('.')
-          lock = json.loads((root / 'ecosystem.lock.json').read_text())
-          def digest(path):
-              return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+          root = Path('/tmp/aps-ggen-evidence')
+          lock = json.loads(Path('specification-guide/manufacturing/ecosystem.lock.json').read_text())
+          files = sorted(p for p in root.rglob('*') if p.is_file() and p.name != 'manufacture.json')
           print(json.dumps({
-              'schema': 'aps.ggen-manufacture-evidence.v26.8.24',
+              'schema': 'aps.ggen-multi-cell-manufacture-evidence.v26.8.24.2',
               'standing': 'ALIVE',
               'apsHead': os.environ['APS_SOURCE_REVISION'],
               'ggen': lock['ggen'],
-              'marketplace': lock['marketplace'],
-              'outputs': {
-                  'docs/SUMMARY.md': digest('docs/SUMMARY.md'),
-                  'book.toml': digest('book.toml')
+              'marketplace': {'commit': lock['marketplace']['commit'], 'packs': sorted(lock['marketplace']['packs'])},
+              'cells': ['mdbook', 'consequence', 'standing', 'dfcm'],
+              'artifacts': {
+                  str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+                  for p in files
               },
               'claims': [
-                  'Pinned ggen executed successfully.',
-                  'Pinned marketplace pack manufactured APS mdBook control projections.',
-                  'ggen receipt verification passed after both manufactures.',
-                  'Second manufacture was byte-identical for qualified projections.',
-                  'Manufactured SUMMARY.md is byte-identical to the committed APS projection.'
+                  'Four specialized ggen manufacturing cells executed at this exact APS head.',
+                  'Critical marketplace pack surfaces matched the exact Git blob datum.',
+                  'Every executed cell reached a deterministic second-manufacture fixed point.',
+                  'ggen receipt verification passed after each manufacture and replay.',
+                  'The DfCM court preserved multiple selectable and deliberately unselected options.'
               ],
               'nonClaims': [
                   'This does not prove complete APS self-hosting.',
-                  'This grants no production DO authority.'
+                  'MANUFACTURED evidentiary standing is not production ACTUATED or VERIFIED standing.',
+                  'DfCM SELECT does not grant DO authority.',
+                  'No cell grants production actuation authority.'
               ]
           }, indent=2, sort_keys=True))
           PY
