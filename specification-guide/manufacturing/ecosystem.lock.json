@@ -1,5 +1,5 @@
 {
-  "schema": "aps.ggen-ecosystem-lock.v26.8.24",
+  "schema": "aps.ggen-ecosystem-lock.v26.8.24.2",
   "ggen": {
     "version": "26.8.21",
     "commit": "f4e1bce1efdcdc4f6c2531be9f66070950f7ec93",
@@ -8,14 +8,53 @@
     "assetSha256": "17c1c36d8b021052e2a482f191a3e32fb24fa088c7a824a16a9c0ce8e10595a4"
   },
   "marketplace": {
-    "commit": "0a3d7b7df9d7053070417864ef11a3953b5e6aab",
-    "pack": "mdbook-pattern-language-pack",
-    "packVersion": "0.1.0",
-    "blobs": {
-      "pack.toml": "87af566fcb20a3590f96b67ea0fa612d0c4b2316",
-      "ontology.ttl": "20bf77b48ac48f2364c0c0980089661703a49079",
-      "templates/SUMMARY.md.tmpl": "c8e528e0130db20b39cc28ca4daaa265ba90bb08",
-      "templates/book.toml.tmpl": "b6db92ca59c35a781797bc12468795530b272c4e"
+    "commit": "b307cdc6da085d633f00bc44f16d42c286558232",
+    "packs": {
+      "mdbook-pattern-language-pack": {
+        "version": "0.1.0",
+        "blobs": {
+          "pack.toml": "87af566fcb20a3590f96b67ea0fa612d0c4b2316",
+          "ontology.ttl": "20bf77b48ac48f2364c0c0980089661703a49079",
+          "templates/SUMMARY.md.tmpl": "c8e528e0130db20b39cc28ca4daaa265ba90bb08",
+          "templates/book.toml.tmpl": "b6db92ca59c35a781797bc12468795530b272c4e"
+        }
+      },
+      "consequence-ir-pack": {
+        "version": "0.2.0",
+        "blobs": {
+          "pack.toml": "7b6eac9f3a9dfa7ce23bce1e374f8d9588920dab",
+          "ontology.ttl": "e27d87dd27b1e4c55e0f42f60ba0f8ab9742144b",
+          "gates/010_execution_closure.rq": "c145543e3b55ae48796fdd5546f9e38c3cdd9d91",
+          "gates/020_do_authority.rq": "0ff9dca314d204de8f7b5a38f3e702effa5f208a",
+          "gates/040_receipt_closure.rq": "a60d1ac2483313699c859a281e864e49d7e55bb8",
+          "templates/consequence-ir-admitted.md.tmpl": "4eae2900d551e393910635fb5c589bde1a5dd572"
+        }
+      },
+      "standing-ladder-pack": {
+        "version": "0.1.1",
+        "blobs": {
+          "pack.toml": "a2dcc92d7f2bcb00ecfd77fb61c43308c8a9fd16",
+          "ontology.ttl": "315b3ff14cb3ead94a9e102a5d1565c1cfdead0c",
+          "gates/010_no_skipped_states.rq": "0207fbe0d6685a0a6391b6ef7b71ab50dc62e27c",
+          "templates/standing_audit_trail.md.tmpl": "ca051ac66ae7ad64e73152f636fdcf03df2fdd01"
+        }
+      },
+      "dfcm-maximalist-court-pack": {
+        "version": "26.8.24",
+        "blobs": {
+          "pack.toml": "b4df8fc9e7f8a0f341e34863c1475631e1d3eaa1",
+          "ggen.toml": "6e11d9e238fc7d619de9bdfef297b8c27e93a4e5",
+          "queries/candidates.rq": "d7cd1be4522993224b6ff7aac34b27079ce32d22",
+          "queries/qualification.rq": "594c8c4a8dca829f73466ce1e39cf8ccbe84b041",
+          "queries/select.rq": "ec3468232f728eec2a29f88ddb17159c7bdf4d23",
+          "templates/candidates.json.tmpl": "c40acbdda40dc14e1ed221a539ae97c8197e8c52",
+          "templates/qualification.json.tmpl": "206298cdfa5711d17de0c1cce32bfd6f7a651805",
+          "templates/select.json.tmpl": "90266305c34142f3c407898d243ea80e10d5fcc1",
+          "gates/all-candidates-have-falsifiers.rq": "24294d4f92f6e5db763f77e9aa6c5d1da227e961",
+          "gates/all-candidates-have-rollback.rq": "7295c4f23f521a3ed1bc8d2a912869ef0f78cbcc",
+          "gates/all-candidates-require-receipts.rq": "2a735527a591a1b2565bbdc5ea9ae3e71d2d6448"
+        }
+      }
     }
   }
 }
