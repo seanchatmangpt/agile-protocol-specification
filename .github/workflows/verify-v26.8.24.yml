@@ -225,15 +225,22 @@ jobs:
           candidates = json.loads((root / 'candidates.json').read_text())
           qualification = json.loads((root / 'qualification.json').read_text())
           selection = json.loads((root / 'select.json').read_text())
-          def rows(value):
-              if isinstance(value, list): return value
-              if isinstance(value, dict):
-                  for key in ('candidates', 'rows', 'items', 'qualification', 'select'):
-                      if isinstance(value.get(key), list): return value[key]
-              raise AssertionError(f'unrecognized generated court shape: {type(value)} {value!r}')
-          assert len(rows(candidates)) == 5, candidates
-          assert len(rows(qualification)) == 5, qualification
-          assert 3 <= len(rows(selection)) < 5, selection
+
+          assert candidates == {
+              'schema': 'dfcm-maximalist-candidate-matrix/v1',
+              'standing': 'UNKNOWN',
+              'candidate_count': 5,
+              'reason': 'Projection is not execution; exact consumer-boundary verification is required before ALIVE.'
+          }, candidates
+          assert qualification['schema'] == 'dfcm-maximalist-qualification/v1', qualification
+          assert qualification['standing'] == 'UNKNOWN', qualification
+          assert qualification['pending_qualification'] == 5, qualification
+          assert 'falsifier' in qualification['rule'].lower(), qualification
+          assert selection['schema'] == 'dfcm-maximalist-select-opportunities/v1', selection
+          assert selection['standing'] == 'UNKNOWN', selection
+          assert selection['authority'] == 'SELECT_ONLY', selection
+          assert 3 <= selection['opportunity_count'] < candidates['candidate_count'], selection
+          assert 'no DO authority' in selection['rule'], selection
           PY
 
       - name: Write multi-cell manufacture evidence
