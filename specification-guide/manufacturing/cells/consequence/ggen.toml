@@ -1,0 +1,11 @@
+[project]
+name = "aps-v26.8.24-consequence-ir"
+
+[ontology]
+source = "ontology.ttl"
+
+[packs]
+"consequence-ir-pack" = { path = "packs/consequence-ir-pack" }
+
+[templates]
+dir = "templates"
