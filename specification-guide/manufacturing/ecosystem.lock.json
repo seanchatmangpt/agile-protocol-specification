@@ -42,11 +42,11 @@
       "dfcm-maximalist-court-pack": {
         "version": "26.8.24",
         "blobs": {
-          "pack.toml": "b4df8fc9e7f8a0f341e34863c1475631e1d3eaa1",
+          "pack.toml": "7804641b2f0337903fae02ddbfcfc03a52cb8df4",
           "ggen.toml": "6e11d9e238fc7d619de9bdfef297b8c27e93a4e5",
           "queries/candidates.rq": "d7cd1be4522993224b6ff7aac34b27079ce32d22",
-          "queries/qualification.rq": "594c8c4a8dca829f73466ce1e39cf8ccbe84b041",
-          "queries/select.rq": "ec3468232f728eec2a29f88ddb17159c7bdf4d23",
+          "queries/qualification.rq": "0b43a8affde8d7457d6b4ced67d707eac7c85741",
+          "queries/select.rq": "73b6a00311f32adda6b592deb4cb6d49a5780b72",
           "templates/candidates.json.tmpl": "c40acbdda40dc14e1ed221a539ae97c8197e8c52",
           "templates/qualification.json.tmpl": "206298cdfa5711d17de0c1cce32bfd6f7a651805",
           "templates/select.json.tmpl": "90266305c34142f3c407898d243ea80e10d5fcc1",
