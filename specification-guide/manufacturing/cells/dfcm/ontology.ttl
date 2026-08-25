@@ -1,0 +1,70 @@
+@prefix dmc: <https://ggen.dev/ontology/dfcm-maximalist-court#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+dmc:Candidate a rdfs:Class .
+dmc:family a rdf:Property .
+dmc:standing a rdf:Property .
+dmc:assumption a rdf:Property .
+dmc:dependency a rdf:Property .
+dmc:ctqNovelty a rdf:Property .
+dmc:ctqEvidence a rdf:Property .
+dmc:rollbackCost a rdf:Property .
+dmc:falsifier a rdf:Property .
+dmc:deterministic a rdf:Property .
+dmc:requiresReceipt a rdf:Property .
+
+<urn:aps:dfcm:ggen-verify-evidence-loop> a dmc:Candidate ;
+  dmc:family "verification-evidence-loop" ;
+  dmc:standing "CANDIDATE" ;
+  dmc:deterministic true ;
+  dmc:rollbackCost 1 ;
+  dmc:ctqNovelty 9 ;
+  dmc:ctqEvidence 7 ;
+  dmc:requiresReceipt true ;
+  dmc:assumption "APS qualification results can be emitted as bounded ver: facts without making the emitter the verifier." ;
+  dmc:falsifier "ggen-verify-pack cannot distinguish fresh exact-head green evidence from stale, red, or missing evidence in an APS consumer." .
+
+<urn:aps:dfcm:constitutional-convergence> a dmc:Candidate ;
+  dmc:family "constitutional-convergence" ;
+  dmc:standing "CANDIDATE" ;
+  dmc:deterministic true ;
+  dmc:rollbackCost 1 ;
+  dmc:ctqNovelty 7 ;
+  dmc:ctqEvidence 6 ;
+  dmc:requiresReceipt true ;
+  dmc:assumption "APS constitutional laws can be represented as consumer-owned ccn:Law facts while preserving disagreement as a defect." ;
+  dmc:falsifier "the ggen-constitution vocabulary forces ggen-specific law identity or silently overrides APS constitutional authority." .
+
+<urn:aps:dfcm:process-mining-proof> a dmc:Candidate ;
+  dmc:family "process-intelligence-proof" ;
+  dmc:standing "CANDIDATE" ;
+  dmc:deterministic true ;
+  dmc:rollbackCost 2 ;
+  dmc:ctqNovelty 8 ;
+  dmc:ctqEvidence 6 ;
+  dmc:requiresReceipt true ;
+  dmc:assumption "APS process-event contracts can project into a process-mining proof surface without introducing a second process authority." ;
+  dmc:falsifier "the process-mining proof cannot preserve event identity, conformance evidence, or replay linkage from APS-owned facts." .
+
+<urn:aps:dfcm:pack-maturity-promotion> a dmc:Candidate ;
+  dmc:family "capital-promotion" ;
+  dmc:standing "CANDIDATE" ;
+  dmc:deterministic true ;
+  dmc:rollbackCost 2 ;
+  dmc:ctqNovelty 8 ;
+  dmc:ctqEvidence 5 ;
+  dmc:requiresReceipt true ;
+  dmc:assumption "successful APS-local patterns can be scored by marketplace maturity law before promotion into reusable capital." ;
+  dmc:falsifier "maturity scoring cannot bind the promoted pattern to replayable evidence and an independently checked consumer." .
+
+<urn:aps:dfcm:full-self-host-closure> a dmc:Candidate ;
+  dmc:family "self-hosting" ;
+  dmc:standing "CANDIDATE" ;
+  dmc:deterministic true ;
+  dmc:rollbackCost 3 ;
+  dmc:ctqNovelty 10 ;
+  dmc:ctqEvidence 3 ;
+  dmc:requiresReceipt true ;
+  dmc:assumption "APS authority, contracts, docs, courts, workflows, and release surfaces can eventually be manufactured from admitted knowledge with only an irreducible bootstrap residue." ;
+  dmc:falsifier "a required APS semantic or qualification surface cannot be represented, generated, or equivalence-checked without making generated output a second authority." .
