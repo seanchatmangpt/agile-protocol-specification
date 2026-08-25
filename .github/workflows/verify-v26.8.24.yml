@@ -96,7 +96,8 @@ jobs:
           git -C "$market_dir" fetch -q --depth 1 origin "$GGEN_MARKETPLACE_COMMIT"
           git -C "$market_dir" checkout -q --detach FETCH_HEAD
           test "$(git -C "$market_dir" rev-parse HEAD)" = "$GGEN_MARKETPLACE_COMMIT"
-          echo "GGEN_MARKETPLACE_ROOT=$market_dir" >> "$GITHUB_ENV"
+          export GGEN_MARKETPLACE_ROOT="$market_dir"
+          echo "GGEN_MARKETPLACE_ROOT=$GGEN_MARKETPLACE_ROOT" >> "$GITHUB_ENV"
 
           python3 - <<'PY' > /tmp/aps-expected-pack-blobs.tsv
           import json
@@ -112,10 +113,10 @@ jobs:
           done < /tmp/aps-expected-pack-blobs.tsv
 
           python3 - <<'PY'
-          import json, tomllib
+          import json, os, tomllib
           from pathlib import Path
           lock = json.loads(Path('specification-guide/manufacturing/ecosystem.lock.json').read_text())
-          root = Path(__import__('os').environ['GGEN_MARKETPLACE_ROOT']) / 'packs'
+          root = Path(os.environ['GGEN_MARKETPLACE_ROOT']) / 'packs'
           for name, meta in lock['marketplace']['packs'].items():
               actual = tomllib.loads((root / name / 'pack.toml').read_text())['pack']['version']
               assert actual == meta['version'], (name, actual, meta['version'])
