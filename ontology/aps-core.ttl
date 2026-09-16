@@ -6,6 +6,7 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix dqv: <http://www.w3.org/ns/dqv#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
 <https://w3id.org/chatman/aps> a owl:Ontology ;
@@ -35,3 +36,30 @@ aps:BUILD_BROKEN a skos:Concept ; skos:prefLabel "BUILD_BROKEN" .
 aps:UNKNOWN a skos:Concept ; skos:prefLabel "UNKNOWN" .
 aps:UNSUPPORTED a skos:Concept ; skos:prefLabel "UNSUPPORTED" .
 aps:REFUSED a skos:Concept ; skos:prefLabel "REFUSED" .
+
+# v26.9.17 additions — swarm manufacturing, session history, operator glyphs
+
+aps:SwarmPacingLaw a owl:Class ; rdfs:subClassOf aps:Contract ;
+  skos:definition "Measured concurrency law: capacity is a function of model tier and agent weight; saturation by top-up, never burst; on rate refusal drain then halve pace." .
+aps:SessionHistoryLaw a owl:Class ; rdfs:subClassOf aps:Contract ;
+  skos:definition "Session state lives in versioned files with append-only history; planning reads tickets, not conversational memory." .
+aps:OperatorGlyph a owl:Class ; rdfs:subClassOf skos:Concept ;
+  skos:definition "Single defined glyph compressing one manufacturing stage; binding only via its declared mapping plus a repo-side enforcement anchor." .
+
+aps:stageIndex a owl:DatatypeProperty ; rdfs:range xsd:integer ;
+  skos:definition "Position of an operator glyph in the canonical manufacturing chain." .
+
+aps:守 a aps:OperatorGlyph ; aps:stageIndex 1 ; skos:prefLabel "守"@ja ; skos:altLabel "preserve"@en ;
+  skos:definition "Predecessor state and lawful options are preserved; admissible structure is never destroyed." .
+aps:柵 a aps:OperatorGlyph ; aps:stageIndex 2 ; skos:prefLabel "柵"@ja ; skos:altLabel "fence"@en ;
+  skos:definition "Boundary that fails closed; unknown reversibility is a fence." .
+aps:算 a aps:OperatorGlyph ; aps:stageIndex 3 ; skos:prefLabel "算"@ja ; skos:altLabel "calculate"@en ;
+  skos:definition "Lawful manufacture over admitted knowledge under admitted manufacturing law." .
+aps:除 a aps:OperatorGlyph ; aps:stageIndex 4 ; skos:prefLabel "除"@ja ; skos:altLabel "exclude"@en ;
+  skos:definition "Dropped alternatives are recorded; silent pruning is forbidden." .
+aps:偽 a aps:OperatorGlyph ; aps:stageIndex 5 ; skos:prefLabel "偽"@ja ; skos:altLabel "falsify"@en ;
+  skos:definition "Adversarial input is manufactured before the claim it tests." .
+aps:延 a aps:OperatorGlyph ; aps:stageIndex 6 ; skos:prefLabel "延"@ja ; skos:altLabel "extend"@en ;
+  skos:definition "An existing family is extended before a new pack is admitted." .
+aps:実 a aps:OperatorGlyph ; aps:stageIndex 7 ; skos:prefLabel "実"@ja ; skos:altLabel "operationalize"@en ;
+  skos:definition "Recurring exceptional judgment is promoted into ontology, policy, generator, verifier, or process control." .
