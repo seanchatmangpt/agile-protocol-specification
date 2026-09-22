@@ -1,0 +1,14 @@
+@prefix es: <https://w3id.org/chatman/engineering-standards#> .
+@prefix prof: <http://www.w3.org/ns/dx/prof/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix project: <https://w3id.org/chatman/project/seanchatmangpt-agile-protocol-specification#> .
+
+project:Profile a prof:Profile ;
+  dcterms:title "seanchatmangpt/agile-protocol-specification engineering-standards adoption" ;
+  dcterms:description "predecessor constitutional evidence and compatibility profile" ;
+  prof:isProfileOf <https://w3id.org/chatman/engineering-standards> ;
+  dcterms:source <https://github.com/seanchatmangpt/engineering-standards/commit/5a3bb6446aeaee2255a7523d4d8cebf6042960c3> .
+
+project:Repository a es:RepositorySubject ;
+  es:repository "seanchatmangpt/agile-protocol-specification" ;
+  es:baseSha "5c31d9d05fe36dc1eca3a26c9eb5cd267a2cf625" .
