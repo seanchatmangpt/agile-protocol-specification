@@ -1,3 +1,16 @@
+# Engineering Standards Root Binding
+
+> Generated adoption header. Shared engineering semantics are rooted at `seanchatmangpt/engineering-standards@5a3bb6446aeaee2255a7523d4d8cebf6042960c3`.
+
+- Repository subject: `seanchatmangpt/agile-protocol-specification@5c31d9d05fe36dc1eca3a26c9eb5cd267a2cf625`
+- Ecosystem role: predecessor constitutional evidence and compatibility profile
+- Adoption manifest: `engineering-standards.json`
+- Project profile: `semantic/engineering-standards-profile.ttl`
+
+The local constitution below remains authoritative for repository-specific mechanics. It may narrow the root but may not redefine shared WorkOrder identity, authority, receipt/replay, generated-artifact sovereignty, or evidence standing. Ticket, agent, capability, plan, proof, and generated output do not acquire ambient DO authority.
+
+---
+
 # AGENTS.md — APS v26.8.24
 
 This repository is an executable specification of knowledge-work reconstitution and autonomic manufacturing. Read `MANIFEST.json`, `.aps-syntax.md`, and the active mdBook before changing anything.
