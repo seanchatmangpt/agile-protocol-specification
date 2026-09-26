@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/chatman/engineering-standards/repository-adoption.schema.json",
+  "title": "Engineering Standards Repository Adoption",
+  "description": "Exact-identity binding from a downstream repository to the engineering-standards root.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema","repository","base_sha","mode","role","root","local_constitution","project_profile","standing","non_claims"],
+  "properties": {
+    "schema": {"const":"engineering-standards.repository-adoption.v26.9.21"},
+    "repository": {"type":"string","pattern":"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+    "base_sha": {"type":"string","pattern":"^[0-9a-f]{40}$"},
+    "mode": {"enum":["ROOT_AWARE","SEMANTIC_WORK","MANUFACTURED","CLOSED_LOOP"]},
+    "role": {"type":"string","minLength":1},
+    "root": {
+      "type":"object",
+      "additionalProperties": false,
+      "required":["repository","sha","version"],
+      "properties":{
+        "repository":{"const":"seanchatmangpt/engineering-standards"},
+        "sha":{"type":"string","pattern":"^[0-9a-f]{40}$"},
+        "version":{"const":"26.9.21"}
+      }
+    },
+    "local_constitution":{"type":"string","minLength":1},
+    "project_profile":{"type":"string","minLength":1},
+    "standing":{"enum":["ALIVE","PARTIAL_ALIVE","UNKNOWN"]},
+    "generator_identity":{"type":"string","minLength":1},
+    "non_claims":{"type":"array","minItems":1,"uniqueItems":true,"items":{"type":"string","minLength":1}}
+  }
+}
