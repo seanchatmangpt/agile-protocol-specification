@@ -71,7 +71,7 @@ def main() -> int:
     court_stats = summary(measure(court, args.iterations))
     repo_stats = summary(measure(whole, args.repo_iterations))
     subject = hashlib.sha256()
-    for rel in (verify.ADOPTION_MANIFEST, verify.ADOPTION_PROFILE, verify.ADOPTION_SCHEMA, "AGENTS.md", "tools/verify.py"):
+    for rel in (verify.ADOPTION_MANIFEST, verify.ADOPTION_PROFILE, verify.ADOPTION_SCHEMA, verify.ADOPTION_GENERATOR, "AGENTS.md", "tools/verify.py", "tools/render_adoption.py"):
         subject.update(rel.encode() + b"\0" + (ROOT / rel).read_bytes() + b"\0")
     breaches = []
     if court_stats["median_s"] > BOUNDS["adoption_court_median_s"]:

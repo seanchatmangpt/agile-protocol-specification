@@ -1,6 +1,6 @@
 # Engineering Standards Root Binding
 
-> Generated adoption header. Shared engineering semantics are rooted at `seanchatmangpt/engineering-standards@5a3bb6446aeaee2255a7523d4d8cebf6042960c3`.
+> Adoption header rendered by `tools/render_adoption.py` from `engineering-standards.json`. Shared engineering semantics are rooted at `seanchatmangpt/engineering-standards@5a3bb6446aeaee2255a7523d4d8cebf6042960c3`.
 
 - Repository subject: `seanchatmangpt/agile-protocol-specification@5c31d9d05fe36dc1eca3a26c9eb5cd267a2cf625`
 - Ecosystem role: predecessor constitutional evidence and compatibility profile
