@@ -19,8 +19,25 @@ EXPECTED_TOP = {
     ".aps-syntax.md", ".claude", ".github", ".gitignore", "AGENTS.md", "CLAUDE.md",
     "CONTRIBUTING.md", "LICENSE", "MANIFEST.json", "Makefile", "README.md", "SECURITY.md",
     "archive", "contracts", "examples", "ontology", "receipts", "simulation",
-    "specification-guide", "tests", "tools"
+    "specification-guide", "tests", "tools",
+    # engineering-standards v26.9.21 root adoption (validated by
+    # validate_engineering_standards_adoption; admission is not standing).
+    "engineering-standards.json", "semantic",
 }
+ADOPTION_MANIFEST = "engineering-standards.json"
+ADOPTION_PROFILE = "semantic/engineering-standards-profile.ttl"
+ADOPTION_SCHEMA = "semantic/schemas/repository-adoption.schema.json"
+# Git blob id of semantic/schemas/repository-adoption.schema.json at
+# seanchatmangpt/engineering-standards@5a3bb6446aeaee2255a7523d4d8cebf6042960c3.
+ADOPTION_SCHEMA_BLOB = "e51eebe15964237cdd1298eb4a3827209bdfb1b4"
+ADOPTION_REPOSITORY = "seanchatmangpt/agile-protocol-specification"
+ADOPTION_ROOT_IRI = "https://w3id.org/chatman/engineering-standards"
+ADOPTION_SEMANTIC_FILES = {ADOPTION_PROFILE, ADOPTION_SCHEMA}
+ADOPTION_NON_CLAIMS = (
+    "root adoption does not prove local runtime behavior",
+    "root adoption does not grant merge, release, deploy, or external DO authority",
+    "local repository courts remain authoritative for local runtime standing",
+)
 EXPECTED_CHAPTERS = [
     "00_source_admission_and_paradigm_reset.md", "01_chatmans_law.md",
     "02_fuller_ephemeralization_and_reconstitution.md", "03_jig_maturity.md",
@@ -149,6 +166,135 @@ def validate_machine_readable(failures: list[str]) -> None:
             validate_instance(event, "process-event.schema.json", f"process event {index}")
 
 
+def git_blob_id(data: bytes) -> str:
+    return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+
+
+def validate_engineering_standards_adoption(root: Path, failures: list[str]) -> None:
+    """Qualify the engineering-standards root adoption at ``root``.
+
+    Checks exact-identity agreement between the adoption manifest, the RDF
+    project profile and the AGENTS.md binding header; refuses stale root
+    coordinates, pinned-schema tampering, path escape, duplicate subjects,
+    unadmitted semantic surfaces and any drop of the no-DO-authority non-claims.
+    """
+    scope = "engineering-standards adoption"
+    manifest_path = root / ADOPTION_MANIFEST
+    schema_path = root / ADOPTION_SCHEMA
+    if not manifest_path.is_file():
+        failures.append(f"{scope}: missing {ADOPTION_MANIFEST}")
+        return
+    try:
+        manifest = json.loads(manifest_path.read_text())
+    except Exception as exc:
+        failures.append(f"{scope}: invalid JSON {ADOPTION_MANIFEST}: {exc}")
+        return
+    if not isinstance(manifest, dict):
+        failures.append(f"{scope}: manifest must be a JSON object")
+        return
+
+    if not schema_path.is_file():
+        failures.append(f"{scope}: missing pinned schema {ADOPTION_SCHEMA}")
+    else:
+        schema_bytes = schema_path.read_bytes()
+        if git_blob_id(schema_bytes) != ADOPTION_SCHEMA_BLOB:
+            failures.append(f"{scope}: pinned schema {ADOPTION_SCHEMA} does not match root blob {ADOPTION_SCHEMA_BLOB}")
+        else:
+            try:
+                from jsonschema import Draft202012Validator
+                validator = Draft202012Validator(json.loads(schema_bytes))
+                for error in sorted(validator.iter_errors(manifest), key=lambda e: list(e.path)):
+                    failures.append(f"{scope}: schema violation at {list(error.path)}: {error.message}")
+            except ImportError as exc:
+                failures.append(f"{scope}: jsonschema unavailable: {exc}")
+
+    repo = manifest.get("repository")
+    base = manifest.get("base_sha")
+    root_meta = manifest.get("root") if isinstance(manifest.get("root"), dict) else {}
+    root_sha = root_meta.get("sha")
+    root_repo = root_meta.get("repository")
+    if repo != ADOPTION_REPOSITORY:
+        failures.append(f"{scope}: repository subject {repo!r} is not {ADOPTION_REPOSITORY!r}")
+    if manifest.get("project_profile") != ADOPTION_PROFILE:
+        failures.append(f"{scope}: project_profile must be {ADOPTION_PROFILE!r}")
+    constitution = manifest.get("local_constitution")
+    if constitution != "AGENTS.md":
+        failures.append(f"{scope}: local_constitution must be 'AGENTS.md', got {constitution!r}")
+    generator = manifest.get("generator_identity")
+    if isinstance(generator, str) and "@" in generator and generator.rsplit("@", 1)[1] != root_sha:
+        failures.append(f"{scope}: generator_identity pinned to stale root {generator.rsplit('@', 1)[1]!r}, root is {root_sha!r}")
+    non_claims = manifest.get("non_claims")
+    if not isinstance(non_claims, list):
+        non_claims = []
+    for claim in ADOPTION_NON_CLAIMS:
+        if claim not in non_claims:
+            failures.append(f"{scope}: required non-claim missing: {claim!r}")
+
+    semantic_dir = root / "semantic"
+    if semantic_dir.exists():
+        present = {p.relative_to(root).as_posix() for p in semantic_dir.rglob("*") if p.is_file()}
+        extra = sorted(present - ADOPTION_SEMANTIC_FILES)
+        if extra:
+            failures.append(f"{scope}: unadmitted semantic surfaces: {extra}")
+
+    profile_path = root / ADOPTION_PROFILE
+    if not profile_path.is_file():
+        failures.append(f"{scope}: missing {ADOPTION_PROFILE}")
+    else:
+        try:
+            from rdflib import Graph, Literal, Namespace, URIRef
+            from rdflib.namespace import DCTERMS, RDF
+        except ImportError as exc:
+            failures.append(f"{scope}: rdflib unavailable: {exc}")
+        else:
+            graph = Graph()
+            try:
+                graph.parse(profile_path, format="turtle")
+            except Exception as exc:
+                failures.append(f"{scope}: invalid Turtle {ADOPTION_PROFILE}: {exc}")
+                graph = None
+            if graph is not None:
+                es = Namespace("https://w3id.org/chatman/engineering-standards#")
+                prof = Namespace("http://www.w3.org/ns/dx/prof/")
+                subjects = list(graph.subjects(RDF.type, es.RepositorySubject))
+                profiles = list(graph.subjects(RDF.type, prof.Profile))
+                if len(subjects) != 1:
+                    failures.append(f"{scope}: expected exactly one es:RepositorySubject, got {len(subjects)}")
+                if len(profiles) != 1:
+                    failures.append(f"{scope}: expected exactly one prof:Profile, got {len(profiles)}")
+                for subject in subjects:
+                    repos = set(graph.objects(subject, es.repository))
+                    bases = set(graph.objects(subject, es.baseSha))
+                    if repos != {Literal(repo)}:
+                        failures.append(f"{scope}: profile es:repository {sorted(map(str, repos))} != manifest {repo!r}")
+                    if bases != {Literal(base)}:
+                        failures.append(f"{scope}: profile es:baseSha {sorted(map(str, bases))} != manifest {base!r}")
+                source = URIRef(f"https://github.com/{root_repo}/commit/{root_sha}")
+                for profile in profiles:
+                    if set(graph.objects(profile, prof.isProfileOf)) != {URIRef(ADOPTION_ROOT_IRI)}:
+                        failures.append(f"{scope}: prof:isProfileOf must be exactly <{ADOPTION_ROOT_IRI}>")
+                    if set(graph.objects(profile, DCTERMS.source)) != {source}:
+                        failures.append(f"{scope}: dcterms:source must be exactly <{source}>")
+
+    agents_path = (root / constitution) if isinstance(constitution, str) else None
+    if agents_path is None or not agents_path.resolve().is_relative_to(root.resolve()) or not agents_path.is_file():
+        failures.append(f"{scope}: local constitution {constitution!r} is not a file inside the repository")
+    else:
+        agents = agents_path.read_text()
+        if not agents.startswith("# Engineering Standards Root Binding\n"):
+            failures.append(f"{scope}: AGENTS.md must open with the generated root-binding header")
+        header = agents.split("\n---\n", 1)[0]
+        for phrase in (
+            f"`{root_repo}@{root_sha}`",
+            f"`{repo}@{base}`",
+            f"`{ADOPTION_MANIFEST}`",
+            f"`{ADOPTION_PROFILE}`",
+            "do not acquire ambient DO authority",
+        ):
+            if phrase not in header:
+                failures.append(f"{scope}: AGENTS.md binding header missing {phrase!r}")
+
+
 def verify_repository() -> tuple[list[str], dict]:
     failures: list[str] = []
 
@@ -244,12 +390,14 @@ def verify_repository() -> tuple[list[str], dict]:
             failures.append("MANIFEST predecessor coordinate mismatch")
 
     validate_machine_readable(failures)
+    validate_engineering_standards_adoption(ROOT, failures)
 
     if (ROOT / "specification-guide/book").exists() or (ROOT / "specification-guide/dist").exists():
         failures.append("generated book/dist outputs must not be committed as active source")
 
     authority_paths = [
         ROOT / "MANIFEST.json", ROOT / ".aps-syntax.md",
+        ROOT / ADOPTION_MANIFEST, ROOT / ADOPTION_PROFILE, ROOT / ADOPTION_SCHEMA,
         *sorted((ROOT / "ontology").glob("*.ttl")),
         *sorted((ROOT / "contracts").glob("*.json")),
         *[version_dir / name for name in EXPECTED_CHAPTERS],
